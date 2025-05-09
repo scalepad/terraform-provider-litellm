@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support for team member permissions in the `litellm_team` resource
 
+### Fixed
+- Fixed issue where team member permissions weren't being applied to existing teams
+
 ## [0.3.0] - 2025-04-23
 
 ### Fixed
