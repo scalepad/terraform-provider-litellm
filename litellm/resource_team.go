@@ -147,11 +147,20 @@ func resourceLiteLLMTeamRead(d *schema.ResourceData, m interface{}) error {
 
 	d.Set("blocked", GetBoolValue(teamResp.Blocked, d.Get("blocked").(bool)))
 
-	// Handle team_member_permissions separately as it's a list
-	if teamResp.TeamMemberPermissions != nil {
-		d.Set("team_member_permissions", teamResp.TeamMemberPermissions)
+	// Explicitly fetch the current permissions from the API
+	permResp, err := getTeamPermissions(client, d.Id())
+	if err != nil {
+		log.Printf("[WARN] Error fetching team permissions: %s", err)
+		// Fall back to the permissions from the team info response
+		if teamResp.TeamMemberPermissions != nil {
+			d.Set("team_member_permissions", teamResp.TeamMemberPermissions)
+		} else {
+			d.Set("team_member_permissions", d.Get("team_member_permissions"))
+		}
 	} else {
-		d.Set("team_member_permissions", d.Get("team_member_permissions"))
+		// Use the permissions from the permissions_list endpoint
+		log.Printf("[DEBUG] Team permissions from API: %+v", permResp.TeamMemberPermissions)
+		d.Set("team_member_permissions", permResp.TeamMemberPermissions)
 	}
 
 	log.Printf("[INFO] Successfully read team with ID: %s", d.Id())
