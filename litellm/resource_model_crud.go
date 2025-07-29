@@ -115,6 +115,7 @@ func createOrUpdateModel(d *schema.ResourceData, m interface{}, isUpdate bool) e
 			BaseModel: baseModel,
 			Tier:      d.Get("tier").(string),
 			Mode:      d.Get("mode").(string),
+			TeamID:    d.Get("team_id").(string),
 		},
 		Additional: make(map[string]interface{}),
 	}
@@ -180,6 +181,7 @@ func resourceLiteLLMModelRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("base_model", GetStringValue(modelResp.ModelInfo.BaseModel, d.Get("base_model").(string)))
 	d.Set("tier", GetStringValue(modelResp.ModelInfo.Tier, d.Get("tier").(string)))
 	d.Set("mode", GetStringValue(modelResp.ModelInfo.Mode, d.Get("mode").(string)))
+	d.Set("team_id", GetStringValue(modelResp.ModelInfo.TeamID, d.Get("team_id").(string)))
 
 	// Store sensitive information
 	d.Set("model_api_key", d.Get("model_api_key"))

@@ -76,6 +76,7 @@ type ModelInfo struct {
 	BaseModel string `json:"base_model"`
 	Tier      string `json:"tier"`
 	Mode      string `json:"mode"`
+	TeamID    string `json:"team_id,omitempty"`
 }
 
 // Key represents a LiteLLM API key.
