@@ -78,6 +78,10 @@ func resourceLiteLLMModel() *schema.Resource {
 				Optional: true,
 				Default:  "free",
 			},
+			"team_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"mode": {
 				Type:     schema.TypeString,
 				Optional: true,

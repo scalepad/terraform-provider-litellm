@@ -5,6 +5,7 @@ This Terraform provider allows you to manage LiteLLM resources through Infrastru
 ## Features
 
 - Manage LiteLLM model configurations
+- Associate models with specific teams
 - Create and manage teams
 - Configure team members and their permissions
 - Set usage limits and budgets
