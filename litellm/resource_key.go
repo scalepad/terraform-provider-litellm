@@ -118,6 +118,10 @@ func resourceKey() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"send_invite_email": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"spend": {
 				Type:     schema.TypeFloat,
 				Computed: true,
@@ -207,6 +211,7 @@ func mapResourceDataToKey(d *schema.ResourceData, key *Key) {
 	key.Guardrails = expandStringList(d.Get("guardrails").([]interface{}))
 	key.Blocked = d.Get("blocked").(bool)
 	key.Tags = expandStringList(d.Get("tags").([]interface{}))
+	key.SendInviteEmail = d.Get("send_invite_email").(bool)
 }
 
 func mapKeyToResourceData(d *schema.ResourceData, key *Key) {
@@ -276,6 +281,7 @@ func mapKeyToResourceData(d *schema.ResourceData, key *Key) {
 	if len(key.Tags) > 0 {
 		d.Set("tags", key.Tags)
 	}
+	d.Set("send_invite_email", key.SendInviteEmail)
 	if key.Spend != 0 {
 		d.Set("spend", key.Spend)
 	}

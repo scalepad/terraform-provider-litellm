@@ -42,6 +42,7 @@ resource "litellm_key" "example" {
   guardrails           = ["content_filter", "token_limit"]
   blocked              = false
   tags                 = ["production", "api"]
+  send_invite_email    = true
 }
 ```
 
@@ -49,57 +50,59 @@ resource "litellm_key" "example" {
 
 The following arguments are supported:
 
-* `models` - (Optional) List of models that can be used with this key. This restricts the key to only use the specified models.
+- `models` - (Optional) List of models that can be used with this key. This restricts the key to only use the specified models.
 
-* `max_budget` - (Optional) Maximum budget for this key. This sets an upper limit on the total spend allowed for this key.
+- `max_budget` - (Optional) Maximum budget for this key. This sets an upper limit on the total spend allowed for this key.
 
-* `user_id` - (Optional) User ID associated with this key. This links the key to a specific user in the LiteLLM system.
+- `user_id` - (Optional) User ID associated with this key. This links the key to a specific user in the LiteLLM system.
 
-* `team_id` - (Optional) Team ID associated with this key. This links the key to a specific team in the LiteLLM system.
+- `team_id` - (Optional) Team ID associated with this key. This links the key to a specific team in the LiteLLM system.
 
-* `max_parallel_requests` - (Optional) Maximum number of parallel requests allowed for this key. This helps in controlling concurrent usage.
+- `max_parallel_requests` - (Optional) Maximum number of parallel requests allowed for this key. This helps in controlling concurrent usage.
 
-* `metadata` - (Optional) Metadata associated with this key. This can be used to store additional, custom information about the key.
+- `metadata` - (Optional) Metadata associated with this key. This can be used to store additional, custom information about the key.
 
-* `tpm_limit` - (Optional) Tokens per minute limit for this key. This sets a rate limit based on the number of tokens processed.
+- `tpm_limit` - (Optional) Tokens per minute limit for this key. This sets a rate limit based on the number of tokens processed.
 
-* `rpm_limit` - (Optional) Requests per minute limit for this key. This sets a rate limit based on the number of API calls.
+- `rpm_limit` - (Optional) Requests per minute limit for this key. This sets a rate limit based on the number of API calls.
 
-* `budget_duration` - (Optional) Duration for the budget (e.g., "monthly", "weekly"). This defines the time period for which the `max_budget` applies.
+- `budget_duration` - (Optional) Duration for the budget (e.g., "monthly", "weekly"). This defines the time period for which the `max_budget` applies.
 
-* `allowed_cache_controls` - (Optional) List of allowed cache control directives. This can be used to control caching behavior for requests made with this key.
+- `allowed_cache_controls` - (Optional) List of allowed cache control directives. This can be used to control caching behavior for requests made with this key.
 
-* `soft_budget` - (Optional) Soft budget limit for this key. This can be used to set a warning threshold before reaching the `max_budget`.
+- `soft_budget` - (Optional) Soft budget limit for this key. This can be used to set a warning threshold before reaching the `max_budget`.
 
-* `key_alias` - (Optional) Alias for this key. This provides a human-readable identifier for the key.
+- `key_alias` - (Optional) Alias for this key. This provides a human-readable identifier for the key.
 
-* `duration` - (Optional) Duration for which this key is valid. This sets an expiration time for the key.
+- `duration` - (Optional) Duration for which this key is valid. This sets an expiration time for the key.
 
-* `aliases` - (Optional) Map of model aliases. This allows you to create custom names for models when using this key.
+- `aliases` - (Optional) Map of model aliases. This allows you to create custom names for models when using this key.
 
-* `config` - (Optional) Configuration options for this key. This can be used to set key-specific settings.
+- `config` - (Optional) Configuration options for this key. This can be used to set key-specific settings.
 
-* `permissions` - (Optional) Permissions associated with this key. This defines what actions are allowed with this key.
+- `permissions` - (Optional) Permissions associated with this key. This defines what actions are allowed with this key.
 
-* `model_max_budget` - (Optional) Maximum budget per model. This allows setting different budget limits for each model.
+- `model_max_budget` - (Optional) Maximum budget per model. This allows setting different budget limits for each model.
 
-* `model_rpm_limit` - (Optional) Requests per minute limit per model. This allows setting different RPM limits for each model.
+- `model_rpm_limit` - (Optional) Requests per minute limit per model. This allows setting different RPM limits for each model.
 
-* `model_tpm_limit` - (Optional) Tokens per minute limit per model. This allows setting different TPM limits for each model.
+- `model_tpm_limit` - (Optional) Tokens per minute limit per model. This allows setting different TPM limits for each model.
 
-* `guardrails` - (Optional) List of guardrails applied to this key. This can be used to enforce certain safety or quality checks.
+- `guardrails` - (Optional) List of guardrails applied to this key. This can be used to enforce certain safety or quality checks.
 
-* `blocked` - (Optional) Whether this key is blocked. If set to true, the key will be unable to make any requests.
+- `blocked` - (Optional) Whether this key is blocked. If set to true, the key will be unable to make any requests.
 
-* `tags` - (Optional) List of tags associated with this key. This can be used for organization and filtering of keys.
+- `tags` - (Optional) List of tags associated with this key. This can be used for organization and filtering of keys.
+
+- `send_invite_email` - (Optional) Whether to send an invite email when creating this key. If set to true, an invitation email will be sent to the associated user.
 
 ## Attribute Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `key` - The generated API key. This is the actual key value that will be used for authentication.
+- `key` - The generated API key. This is the actual key value that will be used for authentication.
 
-* `spend` - The current spend for this key. This reflects the total amount spent using this key so far.
+- `spend` - The current spend for this key. This reflects the total amount spent using this key so far.
 
 ## State Management
 
