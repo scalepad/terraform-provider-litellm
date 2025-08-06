@@ -4,7 +4,7 @@ The LiteLLM provider allows Terraform to manage LiteLLM resources. LiteLLM is a 
 
 ## Example Usage
 
-```hcl
+````hcl
 terraform {
   required_providers {
     litellm = {
@@ -31,11 +31,11 @@ resource "litellm_model" "example" {
   tier                = "paid"
   mode                = "chat"
   reasoning_effort    = "medium"  # Optional: "low", "medium", or "high"
-  
+
   input_cost_per_million_tokens  = 30.0
   output_cost_per_million_tokens = 60.0
 }
-```
+````
 
 ## Authentication
 
@@ -50,5 +50,6 @@ The LiteLLM provider requires an API key and base URL for authentication. These 
 
 The following arguments are supported in the provider block:
 
-* `api_base` - (Required) The base URL of your LiteLLM instance. This can also be provided via the `LITELLM_API_BASE` environment variable.
-* `api_key` - (Required) The API key used to authenticate with LiteLLM. This can also be provided via the `LITELLM_API_KEY` environment variable.
+- `api_base` - (Required) The base URL of your LiteLLM instance. This can also be provided via the `LITELLM_API_BASE` environment variable.
+- `api_key` - (Required) The API key used to authenticate with LiteLLM. This can also be provided via the `LITELLM_API_KEY` environment variable.
+- `insecure_skip_verify` - (Optional) Skip TLS certificate verification when connecting to the LiteLLM API. Defaults to `false`. Use with caution as this makes connections insecure.

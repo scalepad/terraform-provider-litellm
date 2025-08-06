@@ -16,9 +16,9 @@ type Client struct {
 	httpClient *http.Client
 }
 
-func NewClient(apiBase, apiKey string) *Client {
+func NewClient(apiBase, apiKey string, insecureSkipVerify bool) *Client {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
 	}
 
 	return &Client{
