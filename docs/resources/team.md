@@ -10,6 +10,13 @@ resource "litellm_team" "engineering" {
   organization_id = "org_123456"
   models          = ["gpt-4-proxy", "claude-2"]
 
+  team_member_permissions = [
+    "/key/generate",
+    "/key/update",
+    "/key/info",
+    "/key/list"
+  ]
+
   metadata = {
     department = "Engineering"
     project    = "AI Research"
@@ -48,6 +55,8 @@ The following arguments are supported:
   * `weekly`
   * `monthly`
   * `yearly`
+
+* `team_member_permissions` - (Optional) List of permissions granted to team members. Available permissions can be retrieved from the API endpoint `/team/permissions_list`.
 
 ## Attribute Reference
 
