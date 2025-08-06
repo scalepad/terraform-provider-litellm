@@ -6,7 +6,7 @@
 version: 2
 updates:
   # Configuration for Go modules
-  - package-ecosystem: "gomod"
+  - package-ecosystem: "go"
     directory: "/"
     schedule:
       interval: "weekly"
