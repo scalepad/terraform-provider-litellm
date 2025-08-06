@@ -5,7 +5,20 @@
 
 version: 2
 updates:
-  - package-ecosystem: "go" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # Configuration for Go modules
+  - package-ecosystem: "gomod"
+    directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # Configuration for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
