@@ -18,26 +18,27 @@ resource "litellm_team_member" "engineer" {
 
 The following arguments are supported:
 
-* `team_id` - (Required) The ID of the team this member belongs to.
+- `team_id` - (Required) The ID of the team this member belongs to.
 
-* `user_id` - (Required) Unique identifier for the user.
+- `user_id` - (Required) Unique identifier for the user.
 
-* `user_email` - (Required) Email address of the user.
+- `user_email` - (Required) Email address of the user.
 
-* `role` - (Required) The role of the team member. Valid values are:
-  * `org_admin`
-  * `internal_user`
-  * `internal_user_viewer`
-  * `admin`
-  * `user`
+- `role` - (Required) The role of the team member. Valid values are:
 
-* `max_budget_in_team` - (Optional) Maximum budget allocated to this team member within the team's budget.
+  - `org_admin`
+  - `internal_user`
+  - `internal_user_viewer`
+  - `admin`
+  - `user`
+
+- `max_budget_in_team` - (Optional) Maximum budget allocated to this team member within the team's budget.
 
 ## Attribute Reference
 
 In addition to the arguments above, the following attributes are exported:
 
-* `id` - The unique identifier for the team member configuration. This is typically a composite of the team_id and user_id.
+- `id` - The unique identifier for the team member configuration. This is typically a composite of the team_id and user_id.
 
 ## Import
 
@@ -46,6 +47,28 @@ Team members can be imported using the format `team_id:user_id`:
 ```shell
 terraform import litellm_team_member.engineer <team_id>:<user_id>
 ```
+
+### Import Blocks (Terraform 1.5+)
+
+For Terraform 1.5 and later, you can use import blocks for a more declarative approach:
+
+```hcl
+import {
+  to = litellm_team_member.engineer
+  id = "<team_id>:<user_id>"
+}
+
+resource "litellm_team_member" "engineer" {
+  # Configuration will be populated after import
+  team_id            = "team_123"
+  user_id            = "user_456"
+  user_email         = "engineer@example.com"
+  role               = "user"
+  max_budget_in_team = 200.0
+}
+```
+
+Import blocks are the recommended approach for Terraform 1.5+ as they provide better integration with Terraform's planning and state management.
 
 Note: The team_id and user_id should match the values used in the resource configuration.
 

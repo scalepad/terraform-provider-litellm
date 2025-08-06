@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/scalepad/terraform-provider-litellm/litellm/importer"
 )
 
 const (
@@ -22,10 +23,11 @@ const (
 
 func ResourceLiteLLMTeam() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLiteLLMTeamCreate,
-		Read:   resourceLiteLLMTeamRead,
-		Update: resourceLiteLLMTeamUpdate,
-		Delete: resourceLiteLLMTeamDelete,
+		Create:   resourceLiteLLMTeamCreate,
+		Read:     resourceLiteLLMTeamRead,
+		Update:   resourceLiteLLMTeamUpdate,
+		Delete:   resourceLiteLLMTeamDelete,
+		Importer: importer.TeamImporter(),
 
 		Schema: map[string]*schema.Schema{
 			"team_alias": {

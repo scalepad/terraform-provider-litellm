@@ -3,14 +3,16 @@ package litellm
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/scalepad/terraform-provider-litellm/litellm/importer"
 )
 
 func resourceLiteLLMModel() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLiteLLMModelCreate,
-		Read:   resourceLiteLLMModelRead,
-		Update: resourceLiteLLMModelUpdate,
-		Delete: resourceLiteLLMModelDelete,
+		Create:   resourceLiteLLMModelCreate,
+		Read:     resourceLiteLLMModelRead,
+		Update:   resourceLiteLLMModelUpdate,
+		Delete:   resourceLiteLLMModelDelete,
+		Importer: importer.ModelImporter(),
 
 		Schema: map[string]*schema.Schema{
 			"model_name": {

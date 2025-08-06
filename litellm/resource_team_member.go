@@ -6,14 +6,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/scalepad/terraform-provider-litellm/litellm/importer"
 )
 
 func resourceLiteLLMTeamMember() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLiteLLMTeamMemberCreate,
-		Read:   resourceLiteLLMTeamMemberRead,
-		Update: resourceLiteLLMTeamMemberUpdate,
-		Delete: resourceLiteLLMTeamMemberDelete,
+		Create:   resourceLiteLLMTeamMemberCreate,
+		Read:     resourceLiteLLMTeamMemberRead,
+		Update:   resourceLiteLLMTeamMemberUpdate,
+		Delete:   resourceLiteLLMTeamMemberDelete,
+		Importer: importer.TeamMemberImporter(),
 
 		Schema: map[string]*schema.Schema{
 			"team_id": {
