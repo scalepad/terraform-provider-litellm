@@ -5,29 +5,20 @@
 
 version: 2
 updates:
-  # Enable version updates for Go modules with auto-merge
+  # Configuration for Go modules
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
       interval: "weekly"
-    # Enable auto-merge for passing PRs
-    auto-merge: true
-    # For safety, still require manual review for major version updates.
-    # Dependabot will create a PR for these but will not auto-merge it.
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-    # Customize commit messages for clarity in git history
     commit-message:
       prefix: "chore"
       include: "scope"
 
-  # Enable version updates for GitHub Actions with auto-merge
+  # Configuration for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    auto-merge: true
     commit-message:
       prefix: "chore"
       include: "scope"
