@@ -51,7 +51,7 @@ resource "litellm_model" "gpt4" {
   tier                = "paid"
   mode                = "chat"
   reasoning_effort    = "medium"  # Optional: "low", "medium", or "high"
-  
+
   input_cost_per_million_tokens  = 30.0
   output_cost_per_million_tokens = 60.0
 }
@@ -160,16 +160,19 @@ terraform-provider-litellm/
 ### Building the Provider
 
 1. Clone the repository:
+
 ```sh
-git clone https://github.com/your-username/terraform-provider-litellm.git
+git clone https://github.com/scalepad/terraform-provider-litellm.git
 ```
 
 2. Enter the repository directory:
+
 ```sh
 cd terraform-provider-litellm
 ```
 
 3. Build and install the provider:
+
 ```sh
 make install
 ```
@@ -189,6 +192,7 @@ The Makefile provides several useful commands for development:
 ### Testing
 
 To run the tests:
+
 ```sh
 make test
 ```
