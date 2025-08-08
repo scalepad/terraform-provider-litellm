@@ -2,8 +2,9 @@ package litellm
 
 // ProviderConfig holds the configuration for the LiteLLM provider.
 type ProviderConfig struct {
-	APIBase string
-	APIKey  string
+	APIBase            string
+	APIKey             string
+	InsecureSkipVerify bool
 }
 
 // ErrorResponse represents an error response from the API.

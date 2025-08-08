@@ -3,23 +3,27 @@ name: Go CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request: # This ensures Dependabot PRs are tested
-    branches: [ "main" ]
+    branches: ["main"]
+
+# Use minimal permissions following principle of least privilege
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: '1.24' # Specify your Go version
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24" # Specify your Go version
 
-    - name: Build
-      run: go build -v ./...
+      - name: Build
+        run: go build -v ./...
 
-    - name: Test
-      run: go test -v ./...
+      - name: Test
+        run: go test -v ./...
