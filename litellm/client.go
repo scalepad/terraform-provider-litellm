@@ -16,6 +16,11 @@ type Client struct {
 	httpClient *http.Client
 }
 
+// NewClient creates a new Client.
+//
+// WARNING: Setting insecureSkipVerify to true disables TLS certificate verification.
+// This should ONLY be used in development environments or with proper security justification.
+// Disabling certificate verification exposes you to man-in-the-middle attacks and other security risks.
 func NewClient(apiBase, apiKey string, insecureSkipVerify bool) *Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
