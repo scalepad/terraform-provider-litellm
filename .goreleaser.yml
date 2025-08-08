@@ -31,7 +31,8 @@ builds:
         goarch: "386"
     binary: "{{ .ProjectName }}_v{{ .Version }}"
 archives:
-  - format: zip
+  - formats:
+      - zip
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 checksum:
   extra_files:
@@ -62,10 +63,8 @@ release:
     owner: "{{ .Env.GITHUB_OWNER }}"
     name: "{{ .Env.GITHUB_REPO }}"
 changelog:
-  # Enable changelog generation
-  disable: false
-  # Use existing CHANGELOG.md format
   use: github
+  format: "{{.SHA}}: {{.Message}} (@{{.AuthorUsername}})"
   # Sort commits by date
   sort: asc
   # Group commits by type
@@ -91,11 +90,3 @@ changelog:
       - Merge pull request
       - Merge remote-tracking branch
       - Merge branch
-  # Format for changelog entries
-  format: |
-    ## [{{ .Tag }}] - {{ .Date }}
-    {{ range .Groups }}
-    ### {{ .Title }}
-    {{ range .Commits }}
-    - {{ .Message }}{{ end }}
-    {{ end }}
