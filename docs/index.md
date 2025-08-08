@@ -4,7 +4,7 @@ The LiteLLM provider allows Terraform to manage LiteLLM resources. LiteLLM is a 
 
 ## Example Usage
 
-````hcl
+```hcl
 terraform {
   required_providers {
     litellm = {
