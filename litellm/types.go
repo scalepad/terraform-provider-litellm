@@ -27,7 +27,7 @@ type ModelResponse struct {
 // ModelRequest represents a request to create or update a model.
 type ModelRequest struct {
 	ModelName     string                 `json:"model_name"`
-	LiteLLMParams LiteLLMParams          `json:"litellm_params"`
+	LiteLLMParams map[string]interface{} `json:"litellm_params"`
 	ModelInfo     ModelInfo              `json:"model_info"`
 	Additional    map[string]interface{} `json:"additional"`
 }

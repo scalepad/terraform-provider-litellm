@@ -146,6 +146,14 @@ func resourceLiteLLMModel() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"additional_litellm_params": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "Additional parameters to pass to litellm_params beyond the standard ones",
+			},
 		},
 	}
 }
