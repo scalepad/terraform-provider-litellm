@@ -115,50 +115,107 @@ func resourceLiteLLMTeamMemberAddUpdate(d *schema.ResourceData, m interface{}) e
 	oldMembers := o.(*schema.Set)
 	newMembers := n.(*schema.Set)
 
-	// Find members to remove (in old but not in new)
-	for _, member := range oldMembers.Difference(newMembers).List() {
+	// Create maps for easier lookup by user identifier
+	oldMemberMap := make(map[string]map[string]interface{})
+	newMemberMap := make(map[string]map[string]interface{})
+
+	// Build old member map using user_id or user_email as key
+	for _, member := range oldMembers.List() {
 		m := member.(map[string]interface{})
-		deleteData := map[string]interface{}{
-			"team_id": teamID,
+		key := getMemberKey(m)
+		if key != "" {
+			oldMemberMap[key] = m
 		}
-		if userID, ok := m["user_id"].(string); ok && userID != "" {
-			deleteData["user_id"] = userID
-		}
-		if userEmail, ok := m["user_email"].(string); ok && userEmail != "" {
-			deleteData["user_email"] = userEmail
-		}
+	}
 
-		resp, err := MakeRequest(client, "POST", "/team/member_delete", deleteData)
-		if err != nil {
-			return fmt.Errorf("error deleting team member: %v", err)
+	// Build new member map using user_id or user_email as key
+	for _, member := range newMembers.List() {
+		m := member.(map[string]interface{})
+		key := getMemberKey(m)
+		if key != "" {
+			newMemberMap[key] = m
 		}
-		defer resp.Body.Close()
+	}
 
-		if err := handleResponse(resp, "deleting team member"); err != nil {
-			return err
+	// Find members to delete (in old but not in new)
+	for key, oldMember := range oldMemberMap {
+		if _, exists := newMemberMap[key]; !exists {
+			deleteData := map[string]interface{}{
+				"team_id": teamID,
+			}
+			if userID, ok := oldMember["user_id"].(string); ok && userID != "" {
+				deleteData["user_id"] = userID
+			}
+			if userEmail, ok := oldMember["user_email"].(string); ok && userEmail != "" {
+				deleteData["user_email"] = userEmail
+			}
+
+			log.Printf("[DEBUG] Delete team member request payload: %+v", deleteData)
+
+			resp, err := MakeRequest(client, "POST", "/team/member_delete", deleteData)
+			if err != nil {
+				return fmt.Errorf("error deleting team member: %v", err)
+			}
+			defer resp.Body.Close()
+
+			if err := handleResponse(resp, "deleting team member"); err != nil {
+				return err
+			}
+		}
+	}
+
+	// Find members to update (exist in both but with different attributes)
+	for key, newMember := range newMemberMap {
+		if oldMember, exists := oldMemberMap[key]; exists {
+			// Check if member attributes have changed
+			if memberAttributesChanged(oldMember, newMember) {
+				updateData := map[string]interface{}{
+					"team_id":            teamID,
+					"role":               newMember["role"].(string),
+					"max_budget_in_team": maxBudget,
+				}
+				if userID, ok := newMember["user_id"].(string); ok && userID != "" {
+					updateData["user_id"] = userID
+				}
+				if userEmail, ok := newMember["user_email"].(string); ok && userEmail != "" {
+					updateData["user_email"] = userEmail
+				}
+
+				log.Printf("[DEBUG] Update team member request payload: %+v", updateData)
+
+				resp, err := MakeRequest(client, "POST", "/team/member_update", updateData)
+				if err != nil {
+					return fmt.Errorf("error updating team member: %v", err)
+				}
+				defer resp.Body.Close()
+
+				if err := handleResponse(resp, "updating team member"); err != nil {
+					return err
+				}
+			}
 		}
 	}
 
 	// Find members to add (in new but not in old)
-	membersToAdd := newMembers.Difference(oldMembers).List()
-	if len(membersToAdd) > 0 {
-		membersList := make([]map[string]interface{}, 0, len(membersToAdd))
-		for _, member := range membersToAdd {
-			m := member.(map[string]interface{})
+	var membersToAdd []map[string]interface{}
+	for key, newMember := range newMemberMap {
+		if _, exists := oldMemberMap[key]; !exists {
 			memberData := map[string]interface{}{
-				"role": m["role"].(string),
+				"role": newMember["role"].(string),
 			}
-			if userID, ok := m["user_id"].(string); ok && userID != "" {
+			if userID, ok := newMember["user_id"].(string); ok && userID != "" {
 				memberData["user_id"] = userID
 			}
-			if userEmail, ok := m["user_email"].(string); ok && userEmail != "" {
+			if userEmail, ok := newMember["user_email"].(string); ok && userEmail != "" {
 				memberData["user_email"] = userEmail
 			}
-			membersList = append(membersList, memberData)
+			membersToAdd = append(membersToAdd, memberData)
 		}
+	}
 
+	if len(membersToAdd) > 0 {
 		memberData := map[string]interface{}{
-			"member":             membersList,
+			"member":             membersToAdd,
 			"team_id":            teamID,
 			"max_budget_in_team": maxBudget,
 		}
@@ -177,6 +234,32 @@ func resourceLiteLLMTeamMemberAddUpdate(d *schema.ResourceData, m interface{}) e
 	}
 
 	return resourceLiteLLMTeamMemberAddRead(d, m)
+}
+
+// getMemberKey returns a unique key for a member based on user_id or user_email
+func getMemberKey(member map[string]interface{}) string {
+	if userID, ok := member["user_id"].(string); ok && userID != "" {
+		return "id:" + userID
+	}
+	if userEmail, ok := member["user_email"].(string); ok && userEmail != "" {
+		return "email:" + userEmail
+	}
+	return ""
+}
+
+// memberAttributesChanged checks if member attributes have changed between old and new
+func memberAttributesChanged(oldMember, newMember map[string]interface{}) bool {
+	// Compare role
+	oldRole, _ := oldMember["role"].(string)
+	newRole, _ := newMember["role"].(string)
+	if oldRole != newRole {
+		return true
+	}
+
+	// Note: max_budget_in_team is handled at the resource level, not per member
+	// so we don't need to compare it here
+
+	return false
 }
 
 func resourceLiteLLMTeamMemberAddDelete(d *schema.ResourceData, m interface{}) error {
