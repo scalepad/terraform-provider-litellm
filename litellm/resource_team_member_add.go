@@ -137,6 +137,46 @@ func resourceLiteLLMTeamMemberAddUpdate(d *schema.ResourceData, m interface{}) e
 		}
 	}
 
+	// Track which members have been updated to avoid duplicates
+	updatedMembers := make(map[string]bool)
+
+	// Check if max_budget_in_team has changed
+	if d.HasChange("max_budget_in_team") {
+		log.Printf("[DEBUG] max_budget_in_team changed, updating all existing members with new budget: %f", maxBudget)
+
+		// Update ALL existing members with the new budget
+		for key, newMember := range newMemberMap {
+			if _, exists := oldMemberMap[key]; exists {
+				updateData := map[string]interface{}{
+					"team_id":            teamID,
+					"role":               newMember["role"].(string),
+					"max_budget_in_team": maxBudget,
+				}
+				if userID, ok := newMember["user_id"].(string); ok && userID != "" {
+					updateData["user_id"] = userID
+				}
+				if userEmail, ok := newMember["user_email"].(string); ok && userEmail != "" {
+					updateData["user_email"] = userEmail
+				}
+
+				log.Printf("[DEBUG] Update team member budget request payload: %+v", updateData)
+
+				resp, err := MakeRequest(client, "POST", "/team/member_update", updateData)
+				if err != nil {
+					return fmt.Errorf("error updating team member budget: %v", err)
+				}
+				defer resp.Body.Close()
+
+				if err := handleResponse(resp, "updating team member budget"); err != nil {
+					return err
+				}
+
+				// Mark this member as updated
+				updatedMembers[key] = true
+			}
+		}
+	}
+
 	// Find members to delete (in old but not in new)
 	for key, oldMember := range oldMemberMap {
 		if _, exists := newMemberMap[key]; !exists {
@@ -165,8 +205,14 @@ func resourceLiteLLMTeamMemberAddUpdate(d *schema.ResourceData, m interface{}) e
 	}
 
 	// Find members to update (exist in both but with different attributes)
+	// Skip members that were already updated due to budget change
 	for key, newMember := range newMemberMap {
 		if oldMember, exists := oldMemberMap[key]; exists {
+			// Skip if already updated due to budget change
+			if updatedMembers[key] {
+				continue
+			}
+
 			// Check if member attributes have changed
 			if memberAttributesChanged(oldMember, newMember) {
 				updateData := map[string]interface{}{
