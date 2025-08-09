@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.6] - 2025-08-08
+
+### Fixed
+- Fixed issue where models deleted from LiteLLM proxy caused terraform plan to fail instead of planning recreation
+- Enhanced ErrorResponse struct to properly parse LiteLLM proxy error format with Detail field
+- Improved isModelNotFoundError function to detect "not found on litellm proxy" messages in Detail.Error field
+
+## [0.3.5] - 2025-08-08
+
+### Fixed
+- Fixed team member update behavior to use member_update endpoint instead of delete/re-add
+- Restored team_member_permissions functionality to litellm_team resource
+- Enhanced team resource with proper permissions management endpoints
+
 ## [0.3.0] - 2025-04-23
 
 ### Fixed
