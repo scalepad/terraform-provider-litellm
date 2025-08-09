@@ -20,6 +20,14 @@ resource "litellm_team" "engineering" {
   rpm_limit       = 5000
   max_budget      = 1000.0
   budget_duration = "monthly"
+  
+  # Team member permissions
+  team_member_permissions = [
+    "create_key",
+    "delete_key",
+    "view_spend",
+    "edit_team"
+  ]
 }
 ```
 
@@ -48,6 +56,8 @@ The following arguments are supported:
   * `weekly`
   * `monthly`
   * `yearly`
+
+* `team_member_permissions` - (Optional) List of permissions granted to team members. This controls what actions team members can perform within the team context.
 
 ## Attribute Reference
 
