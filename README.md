@@ -28,7 +28,7 @@ terraform {
   required_providers {
     litellm = {
       source  = "ncecere/litellm"
-      version = "~> 0.2.3"
+      version = "~> 0.3.10"
     }
   }
 }

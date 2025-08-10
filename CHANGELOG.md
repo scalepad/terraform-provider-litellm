@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.10] - 2025-08-10
+
 ### Added
 - **New Resource**: `litellm_mcp_server` - Manage MCP (Model Context Protocol) servers
   - Support for HTTP, SSE, and stdio transport types
