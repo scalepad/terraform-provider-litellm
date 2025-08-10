@@ -110,3 +110,54 @@ func GetFloatValue(apiValue, defaultValue float64) float64 {
 func GetBoolValue(apiValue, defaultValue bool) bool {
 	return apiValue
 }
+
+// handleMCPAPIResponse handles API responses specifically for MCP server operations
+func handleMCPAPIResponse(resp *http.Response, result interface{}) error {
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errResp ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &errResp); err == nil {
+			if isMCPServerNotFoundError(errResp) {
+				return fmt.Errorf("mcp_server_not_found")
+			}
+		}
+		return fmt.Errorf("API request failed: Status: %s, Response: %s",
+			resp.Status, string(bodyBytes))
+	}
+
+	if err := json.Unmarshal(bodyBytes, result); err != nil {
+		return fmt.Errorf("failed to parse response: %v", err)
+	}
+
+	return nil
+}
+
+// isMCPServerNotFoundError checks if the error response indicates an MCP server not found
+func isMCPServerNotFoundError(errResp ErrorResponse) bool {
+	if msg, ok := errResp.Error.Message.(string); ok {
+		if strings.Contains(msg, "mcp server not found") || strings.Contains(msg, "server not found") {
+			return true
+		}
+	}
+
+	if msgMap, ok := errResp.Error.Message.(map[string]interface{}); ok {
+		if errStr, ok := msgMap["error"].(string); ok {
+			if strings.Contains(errStr, "MCP server with id=") && strings.Contains(errStr, "not found") {
+				return true
+			}
+		}
+	}
+
+	// Check Detail.Error field for LiteLLM proxy error format
+	if errResp.Detail.Error != "" {
+		if strings.Contains(errResp.Detail.Error, "not found") {
+			return true
+		}
+	}
+
+	return false
+}

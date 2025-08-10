@@ -131,6 +131,7 @@ For full details on the <code>litellm_key</code> resource, see the [key resource
 - <code>litellm_team</code>: Manage teams. [Documentation](docs/resources/team.md)
 - <code>litellm_team_member</code>: Manage team members. [Documentation](docs/resources/team_member.md)
 - <code>litellm_key</code>: Manage API keys. [Documentation](docs/resources/key.md)
+- <code>litellm_mcp_server</code>: Manage MCP (Model Context Protocol) servers. [Documentation](docs/resources/mcp_server.md)
 
 ## Development
 

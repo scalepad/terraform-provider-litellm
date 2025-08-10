@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **New Resource**: `litellm_mcp_server` - Manage MCP (Model Context Protocol) servers
+  - Support for HTTP, SSE, and stdio transport types
+  - Configurable authentication types (none, bearer, basic)
+  - MCP access groups for permission management
+  - Cost tracking configuration for MCP tools
+  - Environment variables and command arguments for stdio transport
+  - Health check status monitoring
+  - Comprehensive documentation and examples
+
+### Changed
+- Updated provider to support MCP server management functionality
+- Enhanced API response handling for MCP-specific operations
+
 ## [0.3.9] - 2025-08-10
 
 ### Fixed
