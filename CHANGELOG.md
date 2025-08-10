@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.11] - 2025-08-10
+
+### Added
+- **New Resource**: `litellm_credential` - Manage credentials for secure authentication
+  - Support for storing sensitive credential values (API keys, tokens, etc.)
+  - Non-sensitive credential information storage
+  - Model ID association for credentials
+  - Secure handling of sensitive data with Terraform's sensitive attribute
+- **New Resource**: `litellm_vector_store` - Manage vector stores for embeddings and RAG
+  - Support for multiple vector store providers (Pinecone, Weaviate, Chroma, Qdrant, etc.)
+  - Integration with credential management for secure authentication
+  - Configurable metadata and provider-specific parameters
+  - Full CRUD operations for vector store lifecycle management
+- **New Data Source**: `litellm_credential` - Retrieve information about existing credentials
+  - Read-only access to credential metadata (sensitive values excluded for security)
+  - Support for model ID filtering
+  - Cross-stack and cross-configuration referencing capabilities
+- **New Data Source**: `litellm_vector_store` - Retrieve information about existing vector stores
+  - Complete vector store information retrieval
+  - Support for monitoring, validation, and cross-referencing use cases
+  - Metadata-based conditional logic support
+- Enhanced API response handling for credential and vector store operations
+- Comprehensive documentation and examples for new resources and data sources
+- Example Terraform configurations for common use cases
+
+### Changed
+- Extended `utils.go` with specialized API response handlers for credentials and vector stores
+- Updated provider configuration to include new resources and data sources
+- Enhanced error handling for credential and vector store not found scenarios
+
 ## [0.3.10] - 2025-08-10
 
 ### Added

@@ -161,3 +161,119 @@ func isMCPServerNotFoundError(errResp ErrorResponse) bool {
 
 	return false
 }
+
+// isCredentialNotFoundError checks if the error response indicates a credential not found
+func isCredentialNotFoundError(errResp ErrorResponse) bool {
+	if msg, ok := errResp.Error.Message.(string); ok {
+		if strings.Contains(msg, "credential not found") {
+			return true
+		}
+	}
+
+	if msgMap, ok := errResp.Error.Message.(map[string]interface{}); ok {
+		if errStr, ok := msgMap["error"].(string); ok {
+			if strings.Contains(errStr, "Credential with name=") && strings.Contains(errStr, "not found") {
+				return true
+			}
+		}
+	}
+
+	// Check Detail.Error field for LiteLLM proxy error format
+	if errResp.Detail.Error != "" {
+		if strings.Contains(errResp.Detail.Error, "credential not found") {
+			return true
+		}
+	}
+
+	return false
+}
+
+// handleCredentialAPIResponse handles API responses specifically for credential operations
+func handleCredentialAPIResponse(resp *http.Response, result interface{}) error {
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return fmt.Errorf("credential_not_found")
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		var errResp ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &errResp); err == nil {
+			if isCredentialNotFoundError(errResp) {
+				return fmt.Errorf("credential_not_found")
+			}
+		}
+		return fmt.Errorf("API request failed: Status: %s, Response: %s",
+			resp.Status, string(bodyBytes))
+	}
+
+	// For credential operations, we might get a simple string response or a credential object
+	if result != nil {
+		if err := json.Unmarshal(bodyBytes, result); err != nil {
+			// If parsing fails, it might be a simple string response which is fine for create/update/delete
+			return nil
+		}
+	}
+
+	return nil
+}
+
+// isVectorStoreNotFoundError checks if the error response indicates a vector store not found
+func isVectorStoreNotFoundError(errResp ErrorResponse) bool {
+	if msg, ok := errResp.Error.Message.(string); ok {
+		if strings.Contains(msg, "vector store not found") {
+			return true
+		}
+	}
+
+	if msgMap, ok := errResp.Error.Message.(map[string]interface{}); ok {
+		if errStr, ok := msgMap["error"].(string); ok {
+			if strings.Contains(errStr, "Vector store with id=") && strings.Contains(errStr, "not found") {
+				return true
+			}
+		}
+	}
+
+	// Check Detail.Error field for LiteLLM proxy error format
+	if errResp.Detail.Error != "" {
+		if strings.Contains(errResp.Detail.Error, "vector store not found") {
+			return true
+		}
+	}
+
+	return false
+}
+
+// handleVectorStoreAPIResponse handles API responses specifically for vector store operations
+func handleVectorStoreAPIResponse(resp *http.Response, result interface{}) error {
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		return fmt.Errorf("vector_store_not_found")
+	}
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		var errResp ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &errResp); err == nil {
+			if isVectorStoreNotFoundError(errResp) {
+				return fmt.Errorf("vector_store_not_found")
+			}
+		}
+		return fmt.Errorf("API request failed: Status: %s, Response: %s",
+			resp.Status, string(bodyBytes))
+	}
+
+	if result != nil {
+		if err := json.Unmarshal(bodyBytes, result); err != nil {
+			return fmt.Errorf("failed to parse response: %v", err)
+		}
+	}
+
+	return nil
+}
