@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func isModelNotFoundError(errResp ErrorResponse) bool {
@@ -85,30 +87,37 @@ func MakeRequest(client *Client, method, endpoint string, body interface{}) (*ht
 	return client.httpClient.Do(req)
 }
 
-// Helper functions to handle potential nil values from the API response
-func GetStringValue(apiValue, defaultValue string) string {
-	if apiValue != "" {
+// GetValueDefault extracts a value from ResourceData with type assertion using the modern GetOk method
+func GetValueDefault[T any](d *schema.ResourceData, key string, keyData map[string]interface{}) {
+	if v, ok := d.GetOk(key); ok {
+		keyData[key] = v.(T)
+	}
+}
+
+// GetStringListValue extracts a string list value from ResourceData using the modern GetOk method
+func GetStringListValue(d *schema.ResourceData, key string, keyData map[string]interface{}) {
+	if v, ok := d.GetOk(key); ok {
+		keyData[key] = expandStringList(v.([]interface{}))
+	}
+}
+
+// Helper functions to handle potential nil values from the API response with generics
+func GetValueWithDefault[T comparable](apiValue, defaultValue T) T {
+	var zero T
+	if apiValue != zero {
 		return apiValue
 	}
 	return defaultValue
 }
 
-func GetIntValue(apiValue, defaultValue int) int {
-	if apiValue != 0 {
-		return apiValue
+// SetIfNotZero sets a value in ResourceData only if the API value is not zero,
+// otherwise keeps the existing value from ResourceData
+func SetIfNotZero[T comparable](d *schema.ResourceData, key string, apiValue T) {
+	var zero T
+	if apiValue != zero {
+		d.Set(key, apiValue)
 	}
-	return defaultValue
-}
-
-func GetFloatValue(apiValue, defaultValue float64) float64 {
-	if apiValue != 0 {
-		return apiValue
-	}
-	return defaultValue
-}
-
-func GetBoolValue(apiValue, defaultValue bool) bool {
-	return apiValue
+	// If apiValue is zero, we don't set anything, keeping the existing value
 }
 
 // handleMCPAPIResponse handles API responses specifically for MCP server operations

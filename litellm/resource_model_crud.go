@@ -239,22 +239,22 @@ func resourceLiteLLMModelRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Update the state with values from the response or fall back to the data passed in during creation
-	d.Set("model_name", GetStringValue(modelResp.ModelName, d.Get("model_name").(string)))
-	d.Set("custom_llm_provider", GetStringValue(modelResp.LiteLLMParams.CustomLLMProvider, d.Get("custom_llm_provider").(string)))
-	d.Set("tpm", GetIntValue(modelResp.LiteLLMParams.TPM, d.Get("tpm").(int)))
-	d.Set("rpm", GetIntValue(modelResp.LiteLLMParams.RPM, d.Get("rpm").(int)))
-	d.Set("model_api_base", GetStringValue(modelResp.LiteLLMParams.APIBase, d.Get("model_api_base").(string)))
-	d.Set("api_version", GetStringValue(modelResp.LiteLLMParams.APIVersion, d.Get("api_version").(string)))
-	d.Set("base_model", GetStringValue(modelResp.ModelInfo.BaseModel, d.Get("base_model").(string)))
-	d.Set("tier", GetStringValue(modelResp.ModelInfo.Tier, d.Get("tier").(string)))
-	d.Set("mode", GetStringValue(modelResp.ModelInfo.Mode, d.Get("mode").(string)))
-	d.Set("team_id", GetStringValue(modelResp.ModelInfo.TeamID, d.Get("team_id").(string)))
+	d.Set("model_name", GetValueWithDefault(modelResp.ModelName, d.Get("model_name").(string)))
+	d.Set("custom_llm_provider", GetValueWithDefault(modelResp.LiteLLMParams.CustomLLMProvider, d.Get("custom_llm_provider").(string)))
+	d.Set("tpm", GetValueWithDefault(modelResp.LiteLLMParams.TPM, d.Get("tpm").(int)))
+	d.Set("rpm", GetValueWithDefault(modelResp.LiteLLMParams.RPM, d.Get("rpm").(int)))
+	d.Set("model_api_base", GetValueWithDefault(modelResp.LiteLLMParams.APIBase, d.Get("model_api_base").(string)))
+	d.Set("api_version", GetValueWithDefault(modelResp.LiteLLMParams.APIVersion, d.Get("api_version").(string)))
+	d.Set("base_model", GetValueWithDefault(modelResp.ModelInfo.BaseModel, d.Get("base_model").(string)))
+	d.Set("tier", GetValueWithDefault(modelResp.ModelInfo.Tier, d.Get("tier").(string)))
+	d.Set("mode", GetValueWithDefault(modelResp.ModelInfo.Mode, d.Get("mode").(string)))
+	d.Set("team_id", GetValueWithDefault(modelResp.ModelInfo.TeamID, d.Get("team_id").(string)))
 
 	// Store sensitive information
 	d.Set("model_api_key", d.Get("model_api_key"))
 	d.Set("aws_access_key_id", d.Get("aws_access_key_id"))
 	d.Set("aws_secret_access_key", d.Get("aws_secret_access_key"))
-	d.Set("aws_region_name", GetStringValue(modelResp.LiteLLMParams.AWSRegionName, d.Get("aws_region_name").(string)))
+	d.Set("aws_region_name", GetValueWithDefault(modelResp.LiteLLMParams.AWSRegionName, d.Get("aws_region_name").(string)))
 
 	// Store cost information
 	d.Set("input_cost_per_million_tokens", d.Get("input_cost_per_million_tokens"))

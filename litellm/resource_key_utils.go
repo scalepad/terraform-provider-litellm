@@ -10,75 +10,40 @@ import (
 func buildKeyData(d *schema.ResourceData) map[string]interface{} {
 	keyData := make(map[string]interface{})
 
-	if v, ok := d.GetOkExists("models"); ok {
-		keyData["models"] = expandStringList(v.([]interface{}))
-	}
-	if v, ok := d.GetOkExists("max_budget"); ok {
-		keyData["max_budget"] = v.(float64)
-	}
-	if v, ok := d.GetOkExists("user_id"); ok {
-		keyData["user_id"] = v.(string)
-	}
-	if v, ok := d.GetOkExists("team_id"); ok {
-		keyData["team_id"] = v.(string)
-	}
-	if v, ok := d.GetOkExists("max_parallel_requests"); ok {
-		keyData["max_parallel_requests"] = v.(int)
-	}
-	if v, ok := d.GetOkExists("metadata"); ok {
-		keyData["metadata"] = v.(map[string]interface{})
-	}
-	if v, ok := d.GetOkExists("tpm_limit"); ok {
-		keyData["tpm_limit"] = v.(int)
-	}
-	if v, ok := d.GetOkExists("rpm_limit"); ok {
-		keyData["rpm_limit"] = v.(int)
-	}
-	if v, ok := d.GetOkExists("budget_duration"); ok {
-		keyData["budget_duration"] = v.(string)
-	}
-	if v, ok := d.GetOkExists("allowed_cache_controls"); ok {
-		keyData["allowed_cache_controls"] = expandStringList(v.([]interface{}))
-	}
-	if v, ok := d.GetOkExists("soft_budget"); ok {
-		keyData["soft_budget"] = v.(float64)
-	}
-	if v, ok := d.GetOkExists("key_alias"); ok {
-		keyData["key_alias"] = v.(string)
-	}
-	if v, ok := d.GetOkExists("duration"); ok {
-		keyData["duration"] = v.(string)
-	}
-	if v, ok := d.GetOkExists("aliases"); ok {
-		keyData["aliases"] = v.(map[string]interface{})
-	}
-	if v, ok := d.GetOkExists("config"); ok {
-		keyData["config"] = v.(map[string]interface{})
-	}
-	if v, ok := d.GetOkExists("permissions"); ok {
-		keyData["permissions"] = v.(map[string]interface{})
-	}
-	if v, ok := d.GetOkExists("model_max_budget"); ok {
-		keyData["model_max_budget"] = v.(map[string]interface{})
-	}
-	if v, ok := d.GetOkExists("model_rpm_limit"); ok {
-		keyData["model_rpm_limit"] = v.(map[string]interface{})
-	}
-	if v, ok := d.GetOkExists("model_tpm_limit"); ok {
-		keyData["model_tpm_limit"] = v.(map[string]interface{})
-	}
-	if v, ok := d.GetOkExists("guardrails"); ok {
-		keyData["guardrails"] = expandStringList(v.([]interface{}))
-	}
-	if v, ok := d.GetOkExists("blocked"); ok {
-		keyData["blocked"] = v.(bool)
-	}
-	if v, ok := d.GetOkExists("tags"); ok {
-		keyData["tags"] = expandStringList(v.([]interface{}))
-	}
-	if v, ok := d.GetOkExists("send_invite_email"); ok {
-		keyData["send_invite_email"] = v.(bool)
-	}
+	// String list fields
+	GetStringListValue(d, "models", keyData)
+	GetStringListValue(d, "allowed_cache_controls", keyData)
+	GetStringListValue(d, "guardrails", keyData)
+	GetStringListValue(d, "tags", keyData)
+
+	// Float64 fields
+	GetValueDefault[float64](d, "max_budget", keyData)
+	GetValueDefault[float64](d, "soft_budget", keyData)
+
+	// String fields
+	GetValueDefault[string](d, "user_id", keyData)
+	GetValueDefault[string](d, "team_id", keyData)
+	GetValueDefault[string](d, "budget_duration", keyData)
+	GetValueDefault[string](d, "key_alias", keyData)
+	GetValueDefault[string](d, "duration", keyData)
+
+	// Int fields
+	GetValueDefault[int](d, "max_parallel_requests", keyData)
+	GetValueDefault[int](d, "tpm_limit", keyData)
+	GetValueDefault[int](d, "rpm_limit", keyData)
+
+	// Bool fields
+	GetValueDefault[bool](d, "blocked", keyData)
+	GetValueDefault[bool](d, "send_invite_email", keyData)
+
+	// Map fields
+	GetValueDefault[map[string]interface{}](d, "metadata", keyData)
+	GetValueDefault[map[string]interface{}](d, "aliases", keyData)
+	GetValueDefault[map[string]interface{}](d, "config", keyData)
+	GetValueDefault[map[string]interface{}](d, "permissions", keyData)
+	GetValueDefault[map[string]interface{}](d, "model_max_budget", keyData)
+	GetValueDefault[map[string]interface{}](d, "model_rpm_limit", keyData)
+	GetValueDefault[map[string]interface{}](d, "model_tpm_limit", keyData)
 
 	return keyData
 }

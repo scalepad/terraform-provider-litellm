@@ -130,21 +130,19 @@ func resourceLiteLLMTeamRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Update the state with values from the response or fall back to the data passed in during creation
-	d.Set("team_alias", GetStringValue(teamResp.TeamAlias, d.Get("team_alias").(string)))
-	d.Set("organization_id", GetStringValue(teamResp.OrganizationID, d.Get("organization_id").(string)))
+	SetIfNotZero(d, "team_alias", teamResp.TeamAlias)
+	SetIfNotZero(d, "organization_id", teamResp.OrganizationID)
 
 	// Handle metadata separately as it's a map
 	if teamResp.Metadata != nil {
 		d.Set("metadata", teamResp.Metadata)
-	} else {
-		d.Set("metadata", d.Get("metadata"))
 	}
 
-	d.Set("tpm_limit", GetIntValue(teamResp.TPMLimit, d.Get("tpm_limit").(int)))
-	d.Set("rpm_limit", GetIntValue(teamResp.RPMLimit, d.Get("rpm_limit").(int)))
-	d.Set("max_budget", GetFloatValue(teamResp.MaxBudget, d.Get("max_budget").(float64)))
-	d.Set("budget_duration", GetStringValue(teamResp.BudgetDuration, d.Get("budget_duration").(string)))
-	d.Set("team_member_budget", GetFloatValue(teamResp.TeamMemberBudget, d.Get("team_member_budget").(float64)))
+	SetIfNotZero(d, "tpm_limit", teamResp.TPMLimit)
+	SetIfNotZero(d, "rpm_limit", teamResp.RPMLimit)
+	SetIfNotZero(d, "max_budget", teamResp.MaxBudget)
+	SetIfNotZero(d, "budget_duration", teamResp.BudgetDuration)
+	SetIfNotZero(d, "team_member_budget", teamResp.TeamMemberBudget)
 
 	// Handle models separately as it's a list
 	if teamResp.Models != nil {
@@ -153,7 +151,7 @@ func resourceLiteLLMTeamRead(d *schema.ResourceData, m interface{}) error {
 		d.Set("models", d.Get("models"))
 	}
 
-	d.Set("blocked", GetBoolValue(teamResp.Blocked, d.Get("blocked").(bool)))
+	d.Set("blocked", teamResp.Blocked)
 
 	// Explicitly fetch the current permissions from the API
 	permResp, err := getTeamPermissions(client, d.Id())
@@ -189,23 +187,6 @@ func resourceLiteLLMTeamUpdate(d *schema.ResourceData, m interface{}) error {
 
 	if err := handleResponse(resp, "updating team"); err != nil {
 		return err
-	}
-
-	// Check if team_member_permissions have changed and explicitly update them
-	if d.HasChange("team_member_permissions") {
-		_, newPerms := d.GetChange("team_member_permissions")
-		if newPerms != nil {
-			// Convert interface{} to []string
-			var permissions []string
-			for _, perm := range newPerms.([]interface{}) {
-				permissions = append(permissions, perm.(string))
-			}
-
-			log.Printf("[DEBUG] Explicitly updating team permissions: %+v", permissions)
-			if err := updateTeamPermissions(client, d.Id(), permissions); err != nil {
-				return fmt.Errorf("error updating team permissions: %w", err)
-			}
-		}
 	}
 
 	// Check if team_member_permissions have changed and explicitly update them
