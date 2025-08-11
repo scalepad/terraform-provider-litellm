@@ -48,8 +48,9 @@ jobs:
         with:
           message: "chore: update CHANGELOG.md for release ${{ github.ref_name }}"
           files: CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          if-no-commit: notice
+          update-local: false # we don't need to pull the remote made changes via git to local
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
