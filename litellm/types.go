@@ -12,6 +12,9 @@ type ErrorResponse struct {
 	Error struct {
 		Message interface{} `json:"message"`
 	} `json:"error"`
+	Detail struct {
+		Error string `json:"error"`
+	} `json:"detail"`
 }
 
 // ModelResponse represents a response from the API containing model information.
@@ -25,7 +28,7 @@ type ModelResponse struct {
 // ModelRequest represents a request to create or update a model.
 type ModelRequest struct {
 	ModelName     string                 `json:"model_name"`
-	LiteLLMParams LiteLLMParams          `json:"litellm_params"`
+	LiteLLMParams map[string]interface{} `json:"litellm_params"`
 	ModelInfo     ModelInfo              `json:"model_info"`
 	Additional    map[string]interface{} `json:"additional"`
 }
@@ -93,7 +96,7 @@ type Key struct {
 	Metadata             map[string]interface{} `json:"metadata,omitempty"`
 	TPMLimit             int                    `json:"tpm_limit,omitempty"`
 	RPMLimit             int                    `json:"rpm_limit,omitempty"`
-	BudgetDuration       string                 `json:"budget_duration"`
+	BudgetDuration       string                 `json:"budget_duration,omitempty"`
 	AllowedCacheControls []string               `json:"allowed_cache_controls,omitempty"`
 	SoftBudget           float64                `json:"soft_budget,omitempty"`
 	KeyAlias             string                 `json:"key_alias,omitempty"`
@@ -113,4 +116,118 @@ type Key struct {
 // KeyResponse represents a response from the API containing key information.
 type KeyResponse struct {
 	Key string `json:"key"`
+}
+
+// MCPServerCostInfo represents cost information for MCP server tools.
+type MCPServerCostInfo struct {
+	DefaultCostPerQuery    float64            `json:"default_cost_per_query,omitempty"`
+	ToolNameToCostPerQuery map[string]float64 `json:"tool_name_to_cost_per_query,omitempty"`
+}
+
+// MCPInfo represents MCP server information and configuration.
+type MCPInfo struct {
+	ServerName        string             `json:"server_name,omitempty"`
+	Description       string             `json:"description,omitempty"`
+	LogoURL           string             `json:"logo_url,omitempty"`
+	MCPServerCostInfo *MCPServerCostInfo `json:"mcp_server_cost_info,omitempty"`
+}
+
+// MCPServerRequest represents a request to create or update an MCP server.
+type MCPServerRequest struct {
+	ServerID        string            `json:"server_id,omitempty"`
+	ServerName      string            `json:"server_name"`
+	Alias           string            `json:"alias,omitempty"`
+	Description     string            `json:"description,omitempty"`
+	Transport       string            `json:"transport"`
+	SpecVersion     string            `json:"spec_version,omitempty"`
+	AuthType        string            `json:"auth_type,omitempty"`
+	URL             string            `json:"url"`
+	MCPInfo         *MCPInfo          `json:"mcp_info,omitempty"`
+	MCPAccessGroups []string          `json:"mcp_access_groups,omitempty"`
+	Command         string            `json:"command,omitempty"`
+	Args            []string          `json:"args,omitempty"`
+	Env             map[string]string `json:"env,omitempty"`
+}
+
+// MCPServerResponse represents a response from the API containing MCP server information.
+type MCPServerResponse struct {
+	ServerID         string              `json:"server_id"`
+	ServerName       string              `json:"server_name"`
+	Alias            string              `json:"alias,omitempty"`
+	Description      string              `json:"description,omitempty"`
+	URL              string              `json:"url"`
+	Transport        string              `json:"transport"`
+	SpecVersion      string              `json:"spec_version,omitempty"`
+	AuthType         string              `json:"auth_type,omitempty"`
+	CreatedAt        string              `json:"created_at,omitempty"`
+	CreatedBy        string              `json:"created_by,omitempty"`
+	UpdatedAt        string              `json:"updated_at,omitempty"`
+	UpdatedBy        string              `json:"updated_by,omitempty"`
+	Teams            []map[string]string `json:"teams,omitempty"`
+	MCPAccessGroups  []string            `json:"mcp_access_groups,omitempty"`
+	MCPInfo          *MCPInfo            `json:"mcp_info,omitempty"`
+	Status           string              `json:"status,omitempty"`
+	LastHealthCheck  string              `json:"last_health_check,omitempty"`
+	HealthCheckError string              `json:"health_check_error,omitempty"`
+	Command          string              `json:"command,omitempty"`
+	Args             []string            `json:"args,omitempty"`
+	Env              map[string]string   `json:"env,omitempty"`
+}
+
+// CredentialRequest represents a request to create or update a credential.
+type CredentialRequest struct {
+	CredentialName   string                 `json:"credential_name"`
+	CredentialInfo   map[string]interface{} `json:"credential_info,omitempty"`
+	CredentialValues map[string]interface{} `json:"credential_values,omitempty"`
+	ModelID          string                 `json:"model_id,omitempty"`
+}
+
+// CredentialResponse represents a response from the API containing credential information.
+type CredentialResponse struct {
+	CredentialName   string                 `json:"credential_name"`
+	CredentialInfo   map[string]interface{} `json:"credential_info,omitempty"`
+	CredentialValues map[string]interface{} `json:"credential_values,omitempty"`
+}
+
+// VectorStoreRequest represents a request to create or update a vector store.
+type VectorStoreRequest struct {
+	VectorStoreID          string                 `json:"vector_store_id,omitempty"`
+	CustomLLMProvider      string                 `json:"custom_llm_provider"`
+	VectorStoreName        string                 `json:"vector_store_name"`
+	VectorStoreDescription string                 `json:"vector_store_description,omitempty"`
+	VectorStoreMetadata    map[string]interface{} `json:"vector_store_metadata,omitempty"`
+	LiteLLMCredentialName  string                 `json:"litellm_credential_name,omitempty"`
+	LiteLLMParams          map[string]interface{} `json:"litellm_params,omitempty"`
+}
+
+// VectorStoreResponse represents a response from the API containing vector store information.
+type VectorStoreResponse struct {
+	VectorStoreID          string                 `json:"vector_store_id"`
+	CustomLLMProvider      string                 `json:"custom_llm_provider"`
+	VectorStoreName        string                 `json:"vector_store_name"`
+	VectorStoreDescription string                 `json:"vector_store_description,omitempty"`
+	VectorStoreMetadata    map[string]interface{} `json:"vector_store_metadata,omitempty"`
+	CreatedAt              string                 `json:"created_at,omitempty"`
+	UpdatedAt              string                 `json:"updated_at,omitempty"`
+	LiteLLMCredentialName  string                 `json:"litellm_credential_name,omitempty"`
+	LiteLLMParams          map[string]interface{} `json:"litellm_params,omitempty"`
+}
+
+// VectorStoreListResponse represents a response from the API containing a list of vector stores.
+type VectorStoreListResponse struct {
+	Object      string                `json:"object"`
+	Data        []VectorStoreResponse `json:"data"`
+	TotalCount  int                   `json:"total_count"`
+	CurrentPage int                   `json:"current_page"`
+	TotalPages  int                   `json:"total_pages"`
+}
+
+// VectorStoreDeleteRequest represents a request to delete a vector store.
+type VectorStoreDeleteRequest struct {
+	VectorStoreID string `json:"vector_store_id"`
+}
+
+// VectorStoreInfoRequest represents a request to get vector store information.
+type VectorStoreInfoRequest struct {
+	VectorStoreID string `json:"vector_store_id"`
 }

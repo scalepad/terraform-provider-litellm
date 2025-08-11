@@ -202,6 +202,23 @@ func resourceLiteLLMTeamUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
+	// Check if team_member_permissions have changed and explicitly update them
+	if d.HasChange("team_member_permissions") {
+		_, newPerms := d.GetChange("team_member_permissions")
+		if newPerms != nil {
+			// Convert interface{} to []string
+			var permissions []string
+			for _, perm := range newPerms.([]interface{}) {
+				permissions = append(permissions, perm.(string))
+			}
+
+			log.Printf("[DEBUG] Explicitly updating team permissions: %+v", permissions)
+			if err := updateTeamPermissions(client, d.Id(), permissions); err != nil {
+				return fmt.Errorf("error updating team permissions: %w", err)
+			}
+		}
+	}
+
 	log.Printf("[INFO] Successfully updated team with ID: %s", d.Id())
 	return resourceLiteLLMTeamRead(d, m)
 }

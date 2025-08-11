@@ -3,6 +3,7 @@ package litellm
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -83,32 +84,98 @@ func createOrUpdateModel(d *schema.ResourceData, m interface{}, isUpdate bool) e
 		}
 	}
 
+	// Build the base litellm_params as a map to allow for additional parameters
+	litellmParams := map[string]interface{}{
+		"custom_llm_provider":                customLLMProvider,
+		"model":                              modelName,
+		"input_cost_per_token":               inputCostPerToken,
+		"output_cost_per_token":              outputCostPerToken,
+		"merge_reasoning_content_in_choices": d.Get("merge_reasoning_content_in_choices").(bool),
+	}
+
+	// Add optional parameters only if they have values
+	if tpm := d.Get("tpm").(int); tpm > 0 {
+		litellmParams["tpm"] = tpm
+	}
+	if rpm := d.Get("rpm").(int); rpm > 0 {
+		litellmParams["rpm"] = rpm
+	}
+	if apiKey := d.Get("model_api_key").(string); apiKey != "" {
+		litellmParams["api_key"] = apiKey
+	}
+	if apiBase := d.Get("model_api_base").(string); apiBase != "" {
+		litellmParams["api_base"] = apiBase
+	}
+	if apiVersion := d.Get("api_version").(string); apiVersion != "" {
+		litellmParams["api_version"] = apiVersion
+	}
+	if inputCostPerPixel := d.Get("input_cost_per_pixel").(float64); inputCostPerPixel > 0 {
+		litellmParams["input_cost_per_pixel"] = inputCostPerPixel
+	}
+	if outputCostPerPixel := d.Get("output_cost_per_pixel").(float64); outputCostPerPixel > 0 {
+		litellmParams["output_cost_per_pixel"] = outputCostPerPixel
+	}
+	if inputCostPerSecond := d.Get("input_cost_per_second").(float64); inputCostPerSecond > 0 {
+		litellmParams["input_cost_per_second"] = inputCostPerSecond
+	}
+	if outputCostPerSecond := d.Get("output_cost_per_second").(float64); outputCostPerSecond > 0 {
+		litellmParams["output_cost_per_second"] = outputCostPerSecond
+	}
+	if awsAccessKeyID := d.Get("aws_access_key_id").(string); awsAccessKeyID != "" {
+		litellmParams["aws_access_key_id"] = awsAccessKeyID
+	}
+	if awsSecretAccessKey := d.Get("aws_secret_access_key").(string); awsSecretAccessKey != "" {
+		litellmParams["aws_secret_access_key"] = awsSecretAccessKey
+	}
+	if awsRegionName := d.Get("aws_region_name").(string); awsRegionName != "" {
+		litellmParams["aws_region_name"] = awsRegionName
+	}
+	if vertexProject := d.Get("vertex_project").(string); vertexProject != "" {
+		litellmParams["vertex_project"] = vertexProject
+	}
+	if vertexLocation := d.Get("vertex_location").(string); vertexLocation != "" {
+		litellmParams["vertex_location"] = vertexLocation
+	}
+	if vertexCredentials := d.Get("vertex_credentials").(string); vertexCredentials != "" {
+		litellmParams["vertex_credentials"] = vertexCredentials
+	}
+	if reasoningEffort := d.Get("reasoning_effort").(string); reasoningEffort != "" {
+		litellmParams["reasoning_effort"] = reasoningEffort
+	}
+	if thinking != nil {
+		litellmParams["thinking"] = thinking
+	}
+
+	// Add additional parameters if provided
+	if additionalParams, ok := d.GetOk("additional_litellm_params"); ok {
+		for key, value := range additionalParams.(map[string]interface{}) {
+			// Convert string values to appropriate types where possible
+			if strValue, ok := value.(string); ok {
+				// Try to convert boolean strings
+				if strValue == "true" {
+					litellmParams[key] = true
+				} else if strValue == "false" {
+					litellmParams[key] = false
+				} else {
+					// Try to convert numeric strings
+					if intValue, err := strconv.Atoi(strValue); err == nil {
+						litellmParams[key] = intValue
+					} else if floatValue, err := strconv.ParseFloat(strValue, 64); err == nil {
+						litellmParams[key] = floatValue
+					} else {
+						// Keep as string
+						litellmParams[key] = strValue
+					}
+				}
+			} else {
+				litellmParams[key] = value
+			}
+		}
+	}
+
 	modelReq := ModelRequest{
-		ModelName: d.Get("model_name").(string),
-		LiteLLMParams: LiteLLMParams{
-			CustomLLMProvider:              customLLMProvider,
-			TPM:                            d.Get("tpm").(int),
-			RPM:                            d.Get("rpm").(int),
-			APIKey:                         d.Get("model_api_key").(string),
-			APIBase:                        d.Get("model_api_base").(string),
-			APIVersion:                     d.Get("api_version").(string),
-			Model:                          modelName,
-			InputCostPerToken:              inputCostPerToken,
-			OutputCostPerToken:             outputCostPerToken,
-			InputCostPerPixel:              d.Get("input_cost_per_pixel").(float64),
-			OutputCostPerPixel:             d.Get("output_cost_per_pixel").(float64),
-			InputCostPerSecond:             d.Get("input_cost_per_second").(float64),
-			OutputCostPerSecond:            d.Get("output_cost_per_second").(float64),
-			AWSAccessKeyID:                 d.Get("aws_access_key_id").(string),
-			AWSSecretAccessKey:             d.Get("aws_secret_access_key").(string),
-			AWSRegionName:                  d.Get("aws_region_name").(string),
-			VertexProject:                  d.Get("vertex_project").(string),
-			VertexLocation:                 d.Get("vertex_location").(string),
-			VertexCredentials:              d.Get("vertex_credentials").(string),
-			ReasoningEffort:                d.Get("reasoning_effort").(string),
-			Thinking:                       thinking,
-			MergeReasoningContentInChoices: d.Get("merge_reasoning_content_in_choices").(bool),
-		},
+		ModelName:     d.Get("model_name").(string),
+		LiteLLMParams: litellmParams,
 		ModelInfo: ModelInfo{
 			ID:        modelID,
 			DBModel:   true,
@@ -228,6 +295,11 @@ func resourceLiteLLMModelRead(d *schema.ResourceData, m interface{}) error {
 	} else {
 		// Only set from API response if we don't have a value in state
 		d.Set("merge_reasoning_content_in_choices", modelResp.LiteLLMParams.MergeReasoningContentInChoices)
+	}
+
+	// Preserve additional_litellm_params from state since API might not return all custom parameters
+	if _, ok := d.GetOk("additional_litellm_params"); ok {
+		d.Set("additional_litellm_params", d.Get("additional_litellm_params"))
 	}
 
 	return nil

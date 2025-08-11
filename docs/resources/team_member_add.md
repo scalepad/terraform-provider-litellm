@@ -1,6 +1,12 @@
 # Resource: litellm_team_member_add
 
-Add multiple members to a team with a single resource.
+Add multiple members to a team with a single resource. This resource efficiently manages team members by using the appropriate API endpoints for each operation:
+
+- **Adding new members**: Uses `/team/member_add` endpoint
+- **Updating existing members**: Uses `/team/member_update` endpoint (preserves member identity)
+- **Removing members**: Uses `/team/member_delete` endpoint
+
+When you modify an existing team member's attributes (like role), the resource will update the member in-place rather than deleting and re-adding them.
 
 ## Example Usage
 
