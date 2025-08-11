@@ -46,7 +46,7 @@ jobs:
       - name: Commit updated changelog
         uses: IAreKyleW00t/verified-bot-commit@v1.5.1
         with:
-          message: "chore: update CHANGELOG.md for release ${{ github.ref_name }}"
+          message: "chore: update CHANGELOG.md for release ${{ github.ref_name }} [skip ci]"
           files: CHANGELOG.md
           ref: refs/heads/main
       - name: Run GoReleaser
