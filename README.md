@@ -28,7 +28,7 @@ terraform {
   required_providers {
     litellm = {
       source  = "scalepad/litellm"
-      version = "~> 0.2.3"
+      version = "~> 0.4.0"
     }
   }
 }
@@ -210,4 +210,4 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - Always use environment variables or secure secret management solutions to handle sensitive information like API keys and AWS credentials.
 - Refer to the `examples/` directory for more detailed usage examples.
 - Make sure to keep your provider version updated for the latest features and bug fixes.
-- v0.2.3 introduces support for the <code>reasoning_effort</code> attribute in the <code>litellm_model</code> resource. This attribute accepts "low", "medium", or "high" to control the model's reasoning effort.
+- v0.4.0 introduces support for the <code>reasoning_effort</code> attribute in the <code>litellm_model</code> resource. This attribute accepts "low", "medium", or "high" to control the model's reasoning effort.

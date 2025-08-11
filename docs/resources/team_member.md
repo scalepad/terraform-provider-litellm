@@ -26,11 +26,11 @@ The following arguments are supported:
 
 - `role` - (Required) The role of the team member. Valid values are:
 
-  - `org_admin`
-  - `internal_user`
-  - `internal_user_viewer`
-  - `admin`
-  - `user`
+  - `org_admin` - Organization administrator with full access
+  - `internal_user` - Internal user with standard access
+  - `internal_user_viewer` - Internal user with read-only access
+  - `admin` - Team administrator
+  - `user` - Standard team member
 
 - `max_budget_in_team` - (Optional) Maximum budget allocated to this team member within the team's budget.
 

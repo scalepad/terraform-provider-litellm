@@ -9,7 +9,7 @@ Add multiple members to a team with a single resource.
 ```hcl
 resource "litellm_team_member_add" "example" {
   team_id = "team-123"
-  
+
   member {
     user_id = "user-456"
     role    = "admin"
@@ -46,7 +46,7 @@ locals {
 
 resource "litellm_team_member_add" "dynamic_example" {
   team_id = "team-456"
-  
+
   dynamic "member" {
     for_each = local.team_members
     content {
@@ -62,16 +62,15 @@ resource "litellm_team_member_add" "dynamic_example" {
 
 ## Argument Reference
 
-* `team_id` - (Required) The ID of the team to add members to.
-* `member` - (Required) One or more member blocks defining team members. Each block supports:
-  * `user_id` - (Optional) The ID of the user to add to the team.
-  * `user_email` - (Optional) The email of the user to add to the team.
-  * `role` - (Required) The role of the user in the team. Must be one of: "admin" or "user".
-* `max_budget_in_team` - (Optional) The maximum budget allocated for the team members.
+- `team_id` - (Required) The ID of the team to add members to.
+- `member` - (Required) One or more member blocks defining team members. Each block supports:
+  - `user_id` - (Optional) The ID of the user to add to the team.
+  - `user_email` - (Optional) The email of the user to add to the team.
+  - `role` - (Required) The role of the user in the team. Valid values are:
+    - `admin` - Team administrator with management permissions
+    - `user` - Standard team member
+- `max_budget_in_team` - (Optional) The maximum budget allocated for the team members.
 
-## Import
+## Note
 
-Team members can be imported using a composite ID of the team ID and user ID:
-
-```shell
-terraform import litellm_team_member_add.example team-123:user-456
+This resource does not support import functionality. Team members must be managed through the resource configuration.
