@@ -8,8 +8,8 @@ The LiteLLM provider allows Terraform to manage LiteLLM resources. LiteLLM is a 
 terraform {
   required_providers {
     litellm = {
-      source  = "bitop/litellm"
-      version = "~> 0.2.3"
+      source  = "scalepad/litellm"
+      version = "~> 0.4.0"
     }
   }
 }
@@ -18,8 +18,9 @@ provider "litellm" {
   api_base = "http://your-litellm-instance:4000"
   api_key  = "your-api-key"
 }
+```
 
-# Example Model Configuration
+## Example Model Configuration
 
 ```hcl
 resource "litellm_model" "example" {
@@ -35,7 +36,7 @@ resource "litellm_model" "example" {
   input_cost_per_million_tokens  = 30.0
   output_cost_per_million_tokens = 60.0
 }
-````
+```
 
 ## Authentication
 

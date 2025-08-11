@@ -56,6 +56,8 @@ release:
   extra_files:
     - glob: "terraform-registry-manifest.json"
       name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
+    - glob: "CHANGELOG.md"
+      name_template: "CHANGELOG.md"
   # If you want to manually examine the release before its live, uncomment this line:
   # draft: true
   # Publish to GitHub

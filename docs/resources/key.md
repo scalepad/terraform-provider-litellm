@@ -6,13 +6,13 @@ Manages a LiteLLM API key.
 
 ```hcl
 resource "litellm_key" "example" {
-  models               = ["gpt-3.5-turbo", "gpt-4"]
+  models               = ["gpt-4", "claude-3.5-sonnet"]
   max_budget           = 100.0
   user_id              = "user123"
   team_id              = "team456"
   max_parallel_requests = 5
   metadata             = {
-    "environment" = "production"
+    environment = "production"
   }
   tpm_limit            = 1000
   rpm_limit            = 60
@@ -22,19 +22,19 @@ resource "litellm_key" "example" {
   key_alias            = "prod-key-1"
   duration             = "30d"
   aliases              = {
-    "gpt-3.5-turbo" = "chatgpt"
+    "gpt-4" = "gpt4"
   }
   config               = {
-    "default_model" = "gpt-3.5-turbo"
+    default_model = "gpt-4"
   }
   permissions          = {
-    "can_create_keys" = "true"
+    can_create_keys = "true"
   }
   model_max_budget     = {
     "gpt-4" = 50.0
   }
   model_rpm_limit      = {
-    "gpt-3.5-turbo" = 30
+    "claude-3.5-sonnet" = 30
   }
   model_tpm_limit      = {
     "gpt-4" = 500

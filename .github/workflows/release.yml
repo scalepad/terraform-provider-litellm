@@ -32,6 +32,24 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+      - name: Add changelog to step summary
+        run: |
+          echo "## Release Changelog" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.changelog.outputs.changes }}" >> $GITHUB_STEP_SUMMARY
+      - name: Commit updated changelog
+        uses: IAreKyleW00t/verified-bot-commit@v1.5.1
+        with:
+          message: "chore: update CHANGELOG.md for release ${{ github.ref_name }}"
+          files: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:

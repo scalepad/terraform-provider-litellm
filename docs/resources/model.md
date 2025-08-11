@@ -14,7 +14,7 @@ resource "litellm_model" "gpt4" {
   base_model          = "gpt-4"
   tier                = "paid"
   team_id             = "team-123"
-  mode                = "completion"
+  mode                = "chat"
   reasoning_effort    = "medium"
   thinking_enabled    = true
   thinking_budget_tokens = 1024
