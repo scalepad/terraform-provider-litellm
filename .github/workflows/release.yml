@@ -38,6 +38,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
+      - name: Add changelog to step summary
+        run: |
+          echo "## Release Changelog" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.changelog.outputs.changes }}" >> $GITHUB_STEP_SUMMARY
       - name: Commit updated changelog
         uses: IAreKyleW00t/verified-bot-commit@v1.5.1
         with:
