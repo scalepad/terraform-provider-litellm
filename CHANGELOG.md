@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.5.2] - 2025-08-11
+### :bug: Bug Fixes
+- [`c10484b`](https://github.com/scalepad/terraform-provider-litellm/commit/c10484b3f5060a08852481350d0923a90beeaa4b) - don't report on null field *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+
 ## [v0.5.1] - 2025-08-11
 ### :sparkles: New Features
 - [`c2e1a2d`](https://github.com/scalepad/terraform-provider-litellm/commit/c2e1a2d7b9886d8d1afda59cdd1380a3c966b770) - add team member buget *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
@@ -199,3 +204,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [v0.4.1]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.4.0...v0.4.1
 [v0.5.0]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.4.1...v0.5.0
 [v0.5.1]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.5.0...v0.5.1
+[v0.5.2]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.5.1...v0.5.2
