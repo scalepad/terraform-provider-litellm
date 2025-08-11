@@ -43,18 +43,12 @@ jobs:
           echo "## Release Changelog" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.changelog.outputs.changes }}" >> $GITHUB_STEP_SUMMARY
-      - name: Extract ref without refs prefix
-        id: extract_ref
-        run: echo "ref=${GITHUB_REF#refs/}" >> $GITHUB_OUTPUT
       - name: Commit updated changelog
         uses: IAreKyleW00t/verified-bot-commit@v1.5.1
         with:
           message: "chore: update CHANGELOG.md for release ${{ github.ref_name }}"
           files: CHANGELOG.md
-          if-no-commit: notice
-          update-local: false # we don't need to pull the remote made changes via git to local
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ steps.extract_ref.outputs.ref }}
+          ref: refs/heads/main
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
