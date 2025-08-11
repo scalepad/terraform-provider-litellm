@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.5.0] - 2025-08-11
+### :sparkles: New Features
+- [`bbd0888`](https://github.com/scalepad/terraform-provider-litellm/commit/bbd088896ef7045c45f567ab3c4b3ee0fa5a3e1c) - add additional_litellm_params support for custom model parameters
+- [`82a5500`](https://github.com/scalepad/terraform-provider-litellm/commit/82a550013e4aac422ceac724a6980f4d50c9ff09) - Add MCP server resource support
+- [`0ed4066`](https://github.com/scalepad/terraform-provider-litellm/commit/0ed4066649751a5787a37ecf281df1eff94d2bc1) - Add credential and vector store resources with data sources
+
+### :bug: Bug Fixes
+- [`98218d0`](https://github.com/scalepad/terraform-provider-litellm/commit/98218d05e1f0ab7593ca1ba436ef57168ed90ade) - handle model not found error and recreate
+- [`59e43a1`](https://github.com/scalepad/terraform-provider-litellm/commit/59e43a10a82aa8cd56c499d9e0871c243864b695) - handle max_budget_in_team updates for existing team members
+
+### :wrench: Chores
+- [`6417bd5`](https://github.com/scalepad/terraform-provider-litellm/commit/6417bd59bb6351d44004b6af60555b0f7100ad99) - update CHANGELOG.md for release v0.4.1 [skip ci] *(commit by [@github-actions[bot]](https://github.com/apps/github-actions))*
+
+
 ## [v0.4.1] - 2025-08-11
 
 ### :sparkles: New Features
@@ -175,3 +189,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for managing teams and team members
 - Comprehensive documentation for all resources
   [v0.4.1]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.4.0...v0.4.1
+[v0.5.0]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.4.1...v0.5.0
