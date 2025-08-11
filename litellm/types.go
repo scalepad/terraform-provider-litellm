@@ -43,6 +43,7 @@ type TeamResponse struct {
 	RPMLimit              int                    `json:"rpm_limit,omitempty"`
 	MaxBudget             float64                `json:"max_budget,omitempty"`
 	BudgetDuration        string                 `json:"budget_duration,omitempty"`
+	TeamMemberBudget      float64                `json:"team_member_budget,omitempty"`
 	Models                []string               `json:"models"`
 	Blocked               bool                   `json:"blocked,omitempty"`
 	TeamMemberPermissions []string               `json:"team_member_permissions,omitempty"`

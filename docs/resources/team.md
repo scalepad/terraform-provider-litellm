@@ -25,9 +25,10 @@ resource "litellm_team" "engineering" {
   blocked         = false
   tpm_limit       = 500000
   rpm_limit       = 5000
-  max_budget      = 1000.0
-  budget_duration = "monthly"
-  
+  max_budget          = 1000.0
+  budget_duration     = "monthly"
+  team_member_budget  = 100.0
+
   # Team member permissions
   team_member_permissions = [
     "create_key",
@@ -66,6 +67,8 @@ The following arguments are supported:
   - `yearly`
 
 - `team_member_permissions` - (Optional) List of permissions granted to team members. Available permissions can be retrieved from the API endpoint `/team/permissions_list`.
+
+- `team_member_budget` - (Optional) Budget automatically given to a new team member.
 
 * `team_member_permissions` - (Optional) List of permissions granted to team members. This controls what actions team members can perform within the team context.
 

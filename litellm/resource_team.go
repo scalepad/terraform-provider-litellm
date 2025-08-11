@@ -74,6 +74,11 @@ func ResourceLiteLLMTeam() *schema.Resource {
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "List of permissions granted to team members",
 			},
+			"team_member_budget": {
+				Type:        schema.TypeFloat,
+				Optional:    true,
+				Description: "Budget automatically given to a new team member",
+			},
 		},
 	}
 }
@@ -139,6 +144,7 @@ func resourceLiteLLMTeamRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("rpm_limit", GetIntValue(teamResp.RPMLimit, d.Get("rpm_limit").(int)))
 	d.Set("max_budget", GetFloatValue(teamResp.MaxBudget, d.Get("max_budget").(float64)))
 	d.Set("budget_duration", GetStringValue(teamResp.BudgetDuration, d.Get("budget_duration").(string)))
+	d.Set("team_member_budget", GetFloatValue(teamResp.TeamMemberBudget, d.Get("team_member_budget").(float64)))
 
 	// Handle models separately as it's a list
 	if teamResp.Models != nil {
@@ -253,7 +259,7 @@ func buildTeamData(d *schema.ResourceData, teamID string) map[string]interface{}
 		"team_alias": d.Get("team_alias").(string),
 	}
 
-	for _, key := range []string{"organization_id", "metadata", "tpm_limit", "rpm_limit", "max_budget", "budget_duration", "models", "blocked", "team_member_permissions"} {
+	for _, key := range []string{"organization_id", "metadata", "tpm_limit", "rpm_limit", "max_budget", "budget_duration", "models", "blocked", "team_member_permissions", "team_member_budget"} {
 		if v, ok := d.GetOk(key); ok {
 			teamData[key] = v
 		}
