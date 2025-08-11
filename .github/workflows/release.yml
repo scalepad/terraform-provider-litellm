@@ -38,6 +38,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
+          excludeTypes: chore,docs,style,refactor,test,build,ci,skip-ci
+
       - name: Add changelog to step summary
         run: |
           echo "## Release Changelog" >> $GITHUB_STEP_SUMMARY
