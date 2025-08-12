@@ -1,12 +1,11 @@
-package models
+package creds
 
 import (
 	"context"
 	"fmt"
-	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 )
 
 func ResourceCredential() *schema.Resource {

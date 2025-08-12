@@ -1,4 +1,4 @@
-package models
+package creds
 
 // Credential represents a credential configuration in LiteLLM
 type Credential struct {
