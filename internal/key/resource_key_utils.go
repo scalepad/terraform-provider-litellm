@@ -1,49 +1,50 @@
-package litellm
+package key
 
 import (
 	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/scalepad/terraform-provider-litellm/internal/utils"
 )
 
 func buildKeyData(d *schema.ResourceData) map[string]interface{} {
 	keyData := make(map[string]interface{})
 
 	// String list fields
-	GetStringListValue(d, "models", keyData)
-	GetStringListValue(d, "allowed_cache_controls", keyData)
-	GetStringListValue(d, "guardrails", keyData)
-	GetStringListValue(d, "tags", keyData)
+	utils.GetStringListValue(d, "models", keyData)
+	utils.GetStringListValue(d, "allowed_cache_controls", keyData)
+	utils.GetStringListValue(d, "guardrails", keyData)
+	utils.GetStringListValue(d, "tags", keyData)
 
 	// Float64 fields
-	GetValueDefault[float64](d, "max_budget", keyData)
-	GetValueDefault[float64](d, "soft_budget", keyData)
+	utils.GetValueDefault[float64](d, "max_budget", keyData)
+	utils.GetValueDefault[float64](d, "soft_budget", keyData)
 
 	// String fields
-	GetValueDefault[string](d, "user_id", keyData)
-	GetValueDefault[string](d, "team_id", keyData)
-	GetValueDefault[string](d, "budget_duration", keyData)
-	GetValueDefault[string](d, "key_alias", keyData)
-	GetValueDefault[string](d, "duration", keyData)
+	utils.GetValueDefault[string](d, "user_id", keyData)
+	utils.GetValueDefault[string](d, "team_id", keyData)
+	utils.GetValueDefault[string](d, "budget_duration", keyData)
+	utils.GetValueDefault[string](d, "key_alias", keyData)
+	utils.GetValueDefault[string](d, "duration", keyData)
 
 	// Int fields
-	GetValueDefault[int](d, "max_parallel_requests", keyData)
-	GetValueDefault[int](d, "tpm_limit", keyData)
-	GetValueDefault[int](d, "rpm_limit", keyData)
+	utils.GetValueDefault[int](d, "max_parallel_requests", keyData)
+	utils.GetValueDefault[int](d, "tpm_limit", keyData)
+	utils.GetValueDefault[int](d, "rpm_limit", keyData)
 
 	// Bool fields
-	GetValueDefault[bool](d, "blocked", keyData)
-	GetValueDefault[bool](d, "send_invite_email", keyData)
+	utils.GetValueDefault[bool](d, "blocked", keyData)
+	utils.GetValueDefault[bool](d, "send_invite_email", keyData)
 
 	// Map fields
-	GetValueDefault[map[string]interface{}](d, "metadata", keyData)
-	GetValueDefault[map[string]interface{}](d, "aliases", keyData)
-	GetValueDefault[map[string]interface{}](d, "config", keyData)
-	GetValueDefault[map[string]interface{}](d, "permissions", keyData)
-	GetValueDefault[map[string]interface{}](d, "model_max_budget", keyData)
-	GetValueDefault[map[string]interface{}](d, "model_rpm_limit", keyData)
-	GetValueDefault[map[string]interface{}](d, "model_tpm_limit", keyData)
+	utils.GetValueDefault[map[string]interface{}](d, "metadata", keyData)
+	utils.GetValueDefault[map[string]interface{}](d, "aliases", keyData)
+	utils.GetValueDefault[map[string]interface{}](d, "config", keyData)
+	utils.GetValueDefault[map[string]interface{}](d, "permissions", keyData)
+	utils.GetValueDefault[map[string]interface{}](d, "model_max_budget", keyData)
+	utils.GetValueDefault[map[string]interface{}](d, "model_rpm_limit", keyData)
+	utils.GetValueDefault[map[string]interface{}](d, "model_tpm_limit", keyData)
 
 	return keyData
 }
