@@ -1,6 +1,11 @@
 package provider
 
 import (
+	"context"
+	"fmt"
+	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/scalepad/terraform-provider-litellm/internal/key"
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
@@ -51,17 +56,33 @@ func Provider() *schema.Provider {
 				Description: "Skip TLS certificate verification when connecting to the LiteLLM API",
 			},
 		},
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigureContext,
 	}
 }
 
-// providerConfigure configures the provider with the given schema data.
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+// providerConfigureContext configures the provider with the given schema data and tests the connection.
+func providerConfigureContext(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	config := litellm.ProviderConfig{
 		APIBase:            d.Get("api_base").(string),
 		APIKey:             d.Get("api_key").(string),
 		InsecureSkipVerify: d.Get("insecure_skip_verify").(bool),
 	}
 
-	return litellm.NewClient(config.APIBase, config.APIKey, config.InsecureSkipVerify), nil
+	client := litellm.NewClient(config.APIBase, config.APIKey, config.InsecureSkipVerify)
+
+	// Test the connection by calling GET /models
+	if err := testConnection(ctx, client); err != nil {
+		return nil, diag.FromErr(fmt.Errorf("failed to connect to LiteLLM API: %v", err))
+	}
+
+	return client, nil
+}
+
+// testConnection tests the connection to the LiteLLM API by calling GET /models
+func testConnection(ctx context.Context, client *litellm.Client) error {
+	_, err := client.SendRequest(ctx, http.MethodGet, "/models", nil)
+	if err != nil {
+		return fmt.Errorf("connection test failed: %w", err)
+	}
+	return nil
 }
