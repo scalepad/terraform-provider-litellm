@@ -70,12 +70,12 @@ func dataSourceLiteLLMCredentialRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func parseCredentialResponse(resp map[string]interface{}) (*litellm.CredentialResponse, error) {
+func parseCredentialResponse(resp map[string]interface{}) (*CredentialResponse, error) {
 	if resp == nil {
 		return nil, fmt.Errorf("received nil response")
 	}
 
-	credentialResp := &litellm.CredentialResponse{}
+	credentialResp := &CredentialResponse{}
 
 	if credentialName, ok := resp["credential_name"].(string); ok {
 		credentialResp.CredentialName = credentialName
