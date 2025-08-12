@@ -15,6 +15,7 @@ import (
 	"github.com/scalepad/terraform-provider-litellm/internal/team/member"
 	"github.com/scalepad/terraform-provider-litellm/internal/tools/mcp"
 	"github.com/scalepad/terraform-provider-litellm/internal/tools/vector"
+	"github.com/scalepad/terraform-provider-litellm/internal/users"
 )
 
 // Provider returns a terraform.ResourceProvider.
@@ -29,6 +30,7 @@ func Provider() *schema.Provider {
 			"litellm_mcp_server":      mcp.ResourceLiteLLMMCPServer(),
 			"litellm_credential":      creds.ResourceCredential(),
 			"litellm_vector_store":    vector.ResourceLiteLLMVectorStore(),
+			"litellm_user":            users.ResourceUser(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"litellm_credential":   creds.DataSourceLiteLLMCredential(),
