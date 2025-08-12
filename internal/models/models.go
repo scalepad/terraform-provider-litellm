@@ -2,6 +2,14 @@ package models
 
 import "github.com/scalepad/terraform-provider-litellm/internal/litellm"
 
+// Model represents a model configuration in LiteLLM
+type Model struct {
+	ModelName     string                 `json:"model_name,omitempty"`
+	LiteLLMParams map[string]interface{} `json:"litellm_params,omitempty"`
+	ModelInfo     ModelInfo              `json:"model_info,omitempty"`
+	Additional    map[string]interface{} `json:"additional,omitempty"`
+}
+
 // ModelResponse represents a response from the API containing model information.
 type ModelResponse struct {
 	ModelName     string                 `json:"model_name"`
@@ -17,6 +25,7 @@ type ModelRequest struct {
 	ModelInfo     ModelInfo              `json:"model_info"`
 	Additional    map[string]interface{} `json:"additional"`
 }
+
 type ModelInfo struct {
 	ID        string `json:"id"`
 	DBModel   bool   `json:"db_model"`
