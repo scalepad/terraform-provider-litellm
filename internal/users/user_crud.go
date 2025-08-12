@@ -67,7 +67,7 @@ func DeleteUser(ctx context.Context, client *litellm.Client, userID string) erro
 	}
 
 	// For delete operations, we don't need the response, just check for errors
-	_, err := litellm.SendRequestTyped[UserDeleteRequest, map[string]interface{}](ctx, client, http.MethodPost, "/user/delete", deleteReq)
+	_, err := litellm.SendRequestTyped[UserDeleteRequest, int](ctx, client, http.MethodPost, "/user/delete", deleteReq)
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}

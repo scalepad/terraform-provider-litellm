@@ -33,8 +33,6 @@ func resourceUserSchema() map[string]*schema.Schema {
 				"proxy_admin_viewer",
 				"internal_user",
 				"internal_user_viewer",
-				"team",
-				"customer",
 			}, false),
 			Description: "Role assigned to the user. Valid values: proxy_admin, proxy_admin_viewer, internal_user, internal_user_viewer, team, customer",
 		},

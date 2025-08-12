@@ -108,8 +108,6 @@ The following arguments are supported:
   - `proxy_admin_viewer` - Read-only administrative access to the proxy
   - `internal_user` - Internal user with standard access
   - `internal_user_viewer` - Internal user with read-only access
-  - `team` - Team-level access
-  - `customer` - Customer-level access
 
 ### Budget and Rate Limiting
 
