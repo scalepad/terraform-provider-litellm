@@ -2,83 +2,11 @@ package key
 
 import (
 	"reflect"
-	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/scalepad/terraform-provider-litellm/internal/utils"
 )
-
-// compareMapValues compares two maps, handling type conversions that Terraform state performs
-func compareMapValues(actual, expected map[string]interface{}) bool {
-	if len(actual) != len(expected) {
-		return false
-	}
-
-	for key, expectedValue := range expected {
-		actualValue, exists := actual[key]
-		if !exists {
-			return false
-		}
-
-		// Handle numeric type conversions (int, int64, float64)
-		if !compareNumericValues(actualValue, expectedValue) {
-			return false
-		}
-	}
-
-	return true
-}
-
-// compareNumericValues handles comparison of numeric values that might have different types
-func compareNumericValues(actual, expected interface{}) bool {
-	// Convert both values to float64 for comparison if they're numeric or string representations of numbers
-	actualFloat, actualIsNumeric := convertToFloat64(actual)
-	expectedFloat, expectedIsNumeric := convertToFloat64(expected)
-
-	if actualIsNumeric && expectedIsNumeric {
-		return actualFloat == expectedFloat
-	}
-
-	// If not both numeric, use regular comparison
-	return reflect.DeepEqual(actual, expected)
-}
-
-// convertToFloat64 converts various numeric types and string representations to float64
-func convertToFloat64(value interface{}) (float64, bool) {
-	switch v := value.(type) {
-	case int:
-		return float64(v), true
-	case int32:
-		return float64(v), true
-	case int64:
-		return float64(v), true
-	case float32:
-		return float64(v), true
-	case float64:
-		return v, true
-	case string:
-		// Try to parse string as number
-		if f, err := strconv.ParseFloat(v, 64); err == nil {
-			return f, true
-		}
-		return 0, false
-	default:
-		return 0, false
-	}
-}
-
-// compareValues compares two values, using special logic for maps
-func compareValues(actual, expected interface{}) bool {
-	// Special handling for maps
-	if actualMap, ok := actual.(map[string]interface{}); ok {
-		if expectedMap, ok := expected.(map[string]interface{}); ok {
-			return compareMapValues(actualMap, expectedMap)
-		}
-	}
-
-	// For non-map types, use regular DeepEqual
-	return reflect.DeepEqual(actual, expected)
-}
 
 func TestBuildKeyData(t *testing.T) {
 	tests := []struct {
@@ -169,9 +97,9 @@ func TestBuildKeyData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Create schema for all possible fields
-			resourceSchema := createTestKeySchema()
-			d := schema.TestResourceDataRaw(t, resourceSchema, tt.input)
+			// Use the actual ResourceKey schema
+			resource := ResourceKey()
+			d := schema.TestResourceDataRaw(t, resource.Schema, tt.input)
 
 			result := buildKeyData(d)
 
@@ -182,7 +110,7 @@ func TestBuildKeyData(t *testing.T) {
 					t.Errorf("buildKeyData() missing key %s", key)
 					continue
 				}
-				if !compareValues(actualValue, expectedValue) {
+				if !utils.CompareValues(actualValue, expectedValue) {
 					t.Errorf("buildKeyData() key %s = %v, want %v", key, actualValue, expectedValue)
 				}
 			}
@@ -223,7 +151,7 @@ func TestSetKeyResourceData(t *testing.T) {
 				Duration:             "30d",
 				Aliases:              map[string]interface{}{"alias1": "value1"},
 				Config:               map[string]interface{}{"timeout": "30s"},
-				Permissions:          map[string]interface{}{"read": true},
+				Permissions:          map[string]interface{}{"read": "true"},
 				ModelMaxBudget:       map[string]interface{}{"gpt-4": 50.0},
 				ModelRPMLimit:        map[string]interface{}{"gpt-4": 30},
 				ModelTPMLimit:        map[string]interface{}{"gpt-4": 500},
@@ -257,8 +185,8 @@ func TestSetKeyResourceData(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			resourceSchema := createTestKeySchema()
-			d := schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{})
+			resource := ResourceKey()
+			d := schema.TestResourceDataRaw(t, resource.Schema, map[string]interface{}{})
 
 			err := setKeyResourceData(d, tt.key)
 
@@ -427,123 +355,5 @@ func TestBuildKeyForCreation(t *testing.T) {
 				t.Errorf("buildKeyForCreation() = %+v, want %+v", result, tt.expected)
 			}
 		})
-	}
-}
-
-// Helper function to create a complete test schema for Key resource
-func createTestKeySchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"key": {
-			Type:      schema.TypeString,
-			Computed:  true,
-			Sensitive: true,
-		},
-		"models": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"spend": {
-			Type:     schema.TypeFloat,
-			Computed: true,
-		},
-		"max_budget": {
-			Type:     schema.TypeFloat,
-			Optional: true,
-		},
-		"user_id": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"team_id": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"max_parallel_requests": {
-			Type:     schema.TypeInt,
-			Optional: true,
-		},
-		"metadata": {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"tpm_limit": {
-			Type:     schema.TypeInt,
-			Optional: true,
-		},
-		"rpm_limit": {
-			Type:     schema.TypeInt,
-			Optional: true,
-		},
-		"budget_duration": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"allowed_cache_controls": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"soft_budget": {
-			Type:     schema.TypeFloat,
-			Optional: true,
-		},
-		"key_alias": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"duration": {
-			Type:     schema.TypeString,
-			Optional: true,
-		},
-		"aliases": {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"config": {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"permissions": {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"model_max_budget": {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"model_rpm_limit": {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"model_tpm_limit": {
-			Type:     schema.TypeMap,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"guardrails": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"blocked": {
-			Type:     schema.TypeBool,
-			Optional: true,
-		},
-		"tags": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Elem:     &schema.Schema{Type: schema.TypeString},
-		},
-		"send_invite_email": {
-			Type:     schema.TypeBool,
-			Optional: true,
-		},
 	}
 }
