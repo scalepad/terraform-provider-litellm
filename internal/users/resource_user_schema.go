@@ -34,7 +34,7 @@ func resourceUserSchema() map[string]*schema.Schema {
 				"internal_user",
 				"internal_user_viewer",
 			}, false),
-			Description: "Role assigned to the user. Valid values: proxy_admin, proxy_admin_viewer, internal_user, internal_user_viewer, team, customer",
+			Description: "Role assigned to the user. Valid values: proxy_admin, proxy_admin_viewer, internal_user, internal_user_viewer",
 		},
 		"max_budget": {
 			Type:        schema.TypeFloat,

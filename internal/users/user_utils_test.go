@@ -75,6 +75,20 @@ func TestBuildUserCreateRequest(t *testing.T) {
 					"department": "engineering",
 					"team":       "ai-platform",
 				},
+				SendInviteEmail:      false,
+				AutoCreateKey:        true,
+				Blocked:              false,
+				Aliases:              map[string]interface{}{},
+				Config:               map[string]interface{}{},
+				AllowedCacheControls: []string{},
+				Guardrails:           []string{},
+				Permissions:          map[string]interface{}{},
+				ModelMaxBudget:       map[string]interface{}{},
+				ModelRPMLimit:        map[string]interface{}{},
+				ModelTPMLimit:        map[string]interface{}{},
+				ObjectPermission:     map[string]interface{}{},
+				Prompts:              []string{},
+				Organizations:        []string{},
 			},
 		},
 		{
@@ -83,7 +97,21 @@ func TestBuildUserCreateRequest(t *testing.T) {
 				"user_id": "user456",
 			},
 			expected: &UserCreateRequest{
-				UserID: "user456",
+				UserID:               "user456",
+				SendInviteEmail:      false,
+				AutoCreateKey:        true,
+				Blocked:              false,
+				Aliases:              map[string]interface{}{},
+				Config:               map[string]interface{}{},
+				AllowedCacheControls: []string{},
+				Guardrails:           []string{},
+				Permissions:          map[string]interface{}{},
+				ModelMaxBudget:       map[string]interface{}{},
+				ModelRPMLimit:        map[string]interface{}{},
+				ModelTPMLimit:        map[string]interface{}{},
+				ObjectPermission:     map[string]interface{}{},
+				Prompts:              []string{},
+				Organizations:        []string{},
 			},
 		},
 		{
@@ -91,14 +119,28 @@ func TestBuildUserCreateRequest(t *testing.T) {
 			input: map[string]interface{}{
 				"user_id":    "user789",
 				"user_email": "partial@example.com",
-				"user_role":  "customer",
+				"user_role":  "internal_user",
 				"max_budget": 50.0,
 			},
 			expected: &UserCreateRequest{
-				UserID:    "user789",
-				UserEmail: "partial@example.com",
-				UserRole:  "customer",
-				MaxBudget: 50.0,
+				UserID:               "user789",
+				UserEmail:            "partial@example.com",
+				UserRole:             "internal_user",
+				MaxBudget:            50.0,
+				SendInviteEmail:      false,
+				AutoCreateKey:        true,
+				Blocked:              false,
+				Aliases:              map[string]interface{}{},
+				Config:               map[string]interface{}{},
+				AllowedCacheControls: []string{},
+				Guardrails:           []string{},
+				Permissions:          map[string]interface{}{},
+				ModelMaxBudget:       map[string]interface{}{},
+				ModelRPMLimit:        map[string]interface{}{},
+				ModelTPMLimit:        map[string]interface{}{},
+				ObjectPermission:     map[string]interface{}{},
+				Prompts:              []string{},
+				Organizations:        []string{},
 			},
 		},
 	}
@@ -271,8 +313,6 @@ func TestUserRoleValidation(t *testing.T) {
 		"proxy_admin_viewer",
 		"internal_user",
 		"internal_user_viewer",
-		"team",
-		"customer",
 	}
 
 	invalidRoles := []string{
@@ -625,7 +665,7 @@ func TestDeleteUser(t *testing.T) {
 			if tt.mockError != nil {
 				responses["POST /user/delete"] = tt.mockError
 			} else {
-				responses["POST /user/delete"] = map[string]string{"status": "success"}
+				responses["POST /user/delete"] = 1
 			}
 
 			// Create mock server
