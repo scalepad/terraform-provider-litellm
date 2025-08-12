@@ -1,15 +1,18 @@
-package litellm
+package models
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 )
 
-func dataSourceLiteLLMCredential() *schema.Resource {
+func DataSourceLiteLLMCredential() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceLiteLLMCredentialRead,
+		ReadContext: dataSourceLiteLLMCredentialRead,
 
 		Schema: map[string]*schema.Schema{
 			"credential_name": {
@@ -33,8 +36,8 @@ func dataSourceLiteLLMCredential() *schema.Resource {
 	}
 }
 
-func dataSourceLiteLLMCredentialRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*Client)
+func dataSourceLiteLLMCredentialRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(*litellm.Client)
 	credentialName := d.Get("credential_name").(string)
 	modelID := d.Get("model_id").(string)
 
@@ -44,23 +47,18 @@ func dataSourceLiteLLMCredentialRead(d *schema.ResourceData, m interface{}) erro
 		endpoint += fmt.Sprintf("?model_id=%s", modelID)
 	}
 
-	resp, err := MakeRequest(client, "GET", endpoint, nil)
+	resp, err := c.SendRequest(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
-		return fmt.Errorf("failed to read credential: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("credential '%s' not found", credentialName)
+		return diag.FromErr(fmt.Errorf("failed to read credential: %w", err))
 	}
 
-	var credentialResp CredentialResponse
-	err = handleCredentialAPIResponse(resp, &credentialResp)
+	if resp == nil {
+		return diag.FromErr(fmt.Errorf("credential '%s' not found", credentialName))
+	}
+
+	credentialResp, err := parseCredentialResponse(resp)
 	if err != nil {
-		if err.Error() == "credential_not_found" {
-			return fmt.Errorf("credential '%s' not found", credentialName)
-		}
-		return fmt.Errorf("failed to read credential: %w", err)
+		return diag.FromErr(fmt.Errorf("failed to parse credential response: %w", err))
 	}
 
 	// Set the data source ID to the credential name
@@ -70,4 +68,24 @@ func dataSourceLiteLLMCredentialRead(d *schema.ResourceData, m interface{}) erro
 	// Note: We don't expose credential_values in data sources for security reasons
 
 	return nil
+}
+
+func parseCredentialResponse(resp map[string]interface{}) (*litellm.CredentialResponse, error) {
+	if resp == nil {
+		return nil, fmt.Errorf("received nil response")
+	}
+
+	credentialResp := &litellm.CredentialResponse{}
+
+	if credentialName, ok := resp["credential_name"].(string); ok {
+		credentialResp.CredentialName = credentialName
+	}
+
+	if credentialInfo, ok := resp["credential_info"].(map[string]interface{}); ok {
+		credentialResp.CredentialInfo = credentialInfo
+	}
+
+	// Note: We don't parse credential_values for security reasons in data sources
+
+	return credentialResp, nil
 }
