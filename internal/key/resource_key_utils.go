@@ -88,14 +88,6 @@ func setKeyResourceData(d *schema.ResourceData, key *Key) error {
 	return nil
 }
 
-func expandStringList(list []interface{}) []string {
-	result := make([]string, len(list))
-	for i, v := range list {
-		result[i] = v.(string)
-	}
-	return result
-}
-
 func mapToKey(data map[string]interface{}) *Key {
 	key := &Key{}
 	for k, v := range data {

@@ -1,4 +1,4 @@
-package litellm
+package utils
 
 import (
 	"testing"
@@ -63,7 +63,7 @@ func TestGetValueWithDefault(t *testing.T) {
 			name:         "bool with false api value",
 			apiValue:     false,
 			defaultValue: true,
-			expected:     true, // Note: for bools, zero value (false) falls back to default
+			expected:     false, // Note: for bools, we return the actual value (including false)
 		},
 	}
 
@@ -162,7 +162,7 @@ func TestSetIfNotZero(t *testing.T) {
 			key:          "test_bool",
 			apiValue:     false,
 			initialValue: true,
-			expectedSet:  false, // false is zero value for bool, so it shouldn't set
+			expectedSet:  true, // For bools, we always set the value (including false)
 		},
 	}
 

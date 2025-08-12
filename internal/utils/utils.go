@@ -1,7 +1,6 @@
-package litellm
+package utils
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,7 +8,24 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 )
+
+// Type aliases for convenience
+type ErrorResponse = litellm.ErrorResponse
+type ModelResponse = litellm.ModelResponse
+type Client = litellm.Client
+
+// expandStringList converts []interface{} to []string
+func expandStringList(list []interface{}) []string {
+	result := make([]string, len(list))
+	for i, v := range list {
+		if str, ok := v.(string); ok {
+			result[i] = str
+		}
+	}
+	return result
+}
 
 func isModelNotFoundError(errResp ErrorResponse) bool {
 	if msg, ok := errResp.Error.Message.(string); ok {
@@ -63,34 +79,25 @@ func handleAPIResponse(resp *http.Response, reqBody interface{}) (*ModelResponse
 }
 
 // MakeRequest is a helper function to make HTTP requests
+// Note: This function is deprecated and should use the client's SendRequest method instead
 func MakeRequest(client *Client, method, endpoint string, body interface{}) (*http.Response, error) {
-	var req *http.Request
-	var err error
-
-	if body != nil {
-		jsonData, err := json.Marshal(body)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal request body: %w", err)
-		}
-		req, err = http.NewRequest(method, fmt.Sprintf("%s%s", client.APIBase, endpoint), bytes.NewBuffer(jsonData))
-	} else {
-		req, err = http.NewRequest(method, fmt.Sprintf("%s%s", client.APIBase, endpoint), nil)
-	}
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", client.APIKey)
-
-	return client.httpClient.Do(req)
+	// This is a placeholder - actual implementations should use client.SendRequest
+	return nil, fmt.Errorf("MakeRequest is deprecated, use client.SendRequest instead")
 }
 
 // GetValueDefault extracts a value from ResourceData with type assertion using the modern GetOk method
+// For boolean types, it always includes the value even if false
 func GetValueDefault[T any](d *schema.ResourceData, key string, keyData map[string]interface{}) {
-	if v, ok := d.GetOk(key); ok {
-		keyData[key] = v.(T)
+	var zero T
+	// Check if T is bool type
+	if _, isBool := any(zero).(bool); isBool {
+		// For booleans, always get the value even if false
+		keyData[key] = d.Get(key).(T)
+	} else {
+		// For other types, use GetOk to only include non-zero values
+		if v, ok := d.GetOk(key); ok {
+			keyData[key] = v.(T)
+		}
 	}
 }
 
@@ -102,8 +109,15 @@ func GetStringListValue(d *schema.ResourceData, key string, keyData map[string]i
 }
 
 // Helper functions to handle potential nil values from the API response with generics
+// For boolean types, it returns the apiValue directly (no zero-value fallback)
 func GetValueWithDefault[T comparable](apiValue, defaultValue T) T {
 	var zero T
+	// Check if T is bool type
+	if _, isBool := any(zero).(bool); isBool {
+		// For booleans, return the actual value (including false)
+		return apiValue
+	}
+	// For other types, use zero-value check
 	if apiValue != zero {
 		return apiValue
 	}
@@ -112,12 +126,20 @@ func GetValueWithDefault[T comparable](apiValue, defaultValue T) T {
 
 // SetIfNotZero sets a value in ResourceData only if the API value is not zero,
 // otherwise keeps the existing value from ResourceData
+// For boolean types, it always sets the value (including false)
 func SetIfNotZero[T comparable](d *schema.ResourceData, key string, apiValue T) {
 	var zero T
-	if apiValue != zero {
+	// Check if T is bool type
+	if _, isBool := any(zero).(bool); isBool {
+		// For booleans, always set the value (including false)
 		d.Set(key, apiValue)
+	} else {
+		// For other types, only set if not zero
+		if apiValue != zero {
+			d.Set(key, apiValue)
+		}
 	}
-	// If apiValue is zero, we don't set anything, keeping the existing value
+	// If apiValue is zero for non-bool types, we don't set anything, keeping the existing value
 }
 
 // handleMCPAPIResponse handles API responses specifically for MCP server operations
