@@ -37,9 +37,6 @@ func ResourceTeamMember() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"org_admin",
-					"internal_user",
-					"internal_user_viewer",
 					"admin",
 					"user",
 				}, false),

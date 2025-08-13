@@ -26,9 +26,6 @@ The following arguments are supported:
 
 - `role` - (Required) The role of the team member. Valid values are:
 
-  - `org_admin` - Organization administrator with full access
-  - `internal_user` - Internal user with standard access
-  - `internal_user_viewer` - Internal user with read-only access
   - `admin` - Team administrator
   - `user` - Standard team member
 
