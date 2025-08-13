@@ -109,6 +109,7 @@ func resourceKeySchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 			Default:  "default",
+			ForceNew: true,
 			ValidateFunc: validation.StringInSlice([]string{
 				"llm_api",
 				"management",
