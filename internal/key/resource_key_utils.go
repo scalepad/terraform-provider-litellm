@@ -3,152 +3,325 @@ package key
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/scalepad/terraform-provider-litellm/internal/utils"
 )
 
-func buildKeyData(d *schema.ResourceData) map[string]interface{} {
-	keyData := make(map[string]interface{})
-
-	// String list fields
-	utils.GetStringListValue(d, "models", keyData)
-	utils.GetStringListValue(d, "allowed_cache_controls", keyData)
-	utils.GetStringListValue(d, "guardrails", keyData)
-	utils.GetStringListValue(d, "tags", keyData)
-
-	// Float64 fields
-	utils.GetValueDefault[float64](d, "max_budget", keyData)
-	utils.GetValueDefault[float64](d, "soft_budget", keyData)
+// buildKeyGenerateRequest creates a KeyGenerateRequest directly from ResourceData
+func buildKeyGenerateRequest(d *schema.ResourceData) *KeyGenerateRequest {
+	request := &KeyGenerateRequest{}
 
 	// String fields
-	utils.GetValueDefault[string](d, "user_id", keyData)
-	utils.GetValueDefault[string](d, "team_id", keyData)
-	utils.GetValueDefault[string](d, "budget_duration", keyData)
-	utils.GetValueDefault[string](d, "key_alias", keyData)
-	utils.GetValueDefault[string](d, "duration", keyData)
-	utils.GetValueDefault[string](d, "key_type", keyData)
-
-	// Int fields
-	utils.GetValueDefault[int](d, "max_parallel_requests", keyData)
-	utils.GetValueDefault[int](d, "tpm_limit", keyData)
-	utils.GetValueDefault[int](d, "rpm_limit", keyData)
-
-	// Bool fields
-	utils.GetValueDefault[bool](d, "blocked", keyData)
-	utils.GetValueDefault[bool](d, "send_invite_email", keyData)
-
-	// Map fields
-	utils.GetValueDefault[map[string]interface{}](d, "metadata", keyData)
-	utils.GetValueDefault[map[string]interface{}](d, "aliases", keyData)
-	utils.GetValueDefault[map[string]interface{}](d, "config", keyData)
-	utils.GetValueDefault[map[string]interface{}](d, "permissions", keyData)
-	utils.GetValueDefault[map[string]interface{}](d, "model_max_budget", keyData)
-	utils.GetValueDefault[map[string]interface{}](d, "model_rpm_limit", keyData)
-	utils.GetValueDefault[map[string]interface{}](d, "model_tpm_limit", keyData)
-
-	return keyData
-}
-
-func setKeyResourceData(d *schema.ResourceData, key *Key) error {
-	fields := map[string]interface{}{
-		"key":                    key.Key,
-		"models":                 key.Models,
-		"spend":                  key.Spend,
-		"max_budget":             key.MaxBudget,
-		"user_id":                key.UserID,
-		"team_id":                key.TeamID,
-		"max_parallel_requests":  key.MaxParallelRequests,
-		"metadata":               key.Metadata,
-		"tpm_limit":              key.TPMLimit,
-		"rpm_limit":              key.RPMLimit,
-		"budget_duration":        key.BudgetDuration,
-		"allowed_cache_controls": key.AllowedCacheControls,
-		"soft_budget":            key.SoftBudget,
-		"key_alias":              key.KeyAlias,
-		"duration":               key.Duration,
-		"aliases":                key.Aliases,
-		"config":                 key.Config,
-		"permissions":            key.Permissions,
-		"model_max_budget":       key.ModelMaxBudget,
-		"model_rpm_limit":        key.ModelRPMLimit,
-		"model_tpm_limit":        key.ModelTPMLimit,
-		"guardrails":             key.Guardrails,
-		"blocked":                key.Blocked,
-		"tags":                   key.Tags,
-		"send_invite_email":      key.SendInviteEmail,
-		"key_type":               key.KeyType,
+	if v, ok := d.GetOk("duration"); ok {
+		request.Duration = stringPtr(v.(string))
+	}
+	if v, ok := d.GetOk("key_alias"); ok {
+		request.KeyAlias = stringPtr(v.(string))
+	}
+	if v, ok := d.GetOk("user_id"); ok {
+		request.UserID = stringPtr(v.(string))
+	}
+	if v, ok := d.GetOk("team_id"); ok {
+		request.TeamID = stringPtr(v.(string))
+	}
+	if v, ok := d.GetOk("budget_id"); ok {
+		request.BudgetID = stringPtr(v.(string))
+	}
+	if v, ok := d.GetOk("key_type"); ok {
+		request.KeyType = stringPtr(v.(string))
+	}
+	if v, ok := d.GetOk("budget_duration"); ok {
+		request.BudgetDuration = stringPtr(v.(string))
 	}
 
-	for field, value := range fields {
-		if err := d.Set(field, value); err != nil {
-			log.Printf("[WARN] Error setting %s: %s", field, err)
-			return fmt.Errorf("error setting %s: %s", field, err)
+	// String slice fields
+	if v, ok := d.GetOk("models"); ok {
+		request.Models = interfaceSliceToStringSlice(v.([]interface{}))
+	}
+	if v, ok := d.GetOk("allowed_cache_controls"); ok {
+		request.AllowedCacheControls = interfaceSliceToStringSlice(v.([]interface{}))
+	}
+	if v, ok := d.GetOk("guardrails"); ok {
+		request.Guardrails = interfaceSliceToStringSlice(v.([]interface{}))
+	}
+	if v, ok := d.GetOk("prompts"); ok {
+		request.Prompts = interfaceSliceToStringSlice(v.([]interface{}))
+	}
+	if v, ok := d.GetOk("tags"); ok {
+		request.Tags = interfaceSliceToStringSlice(v.([]interface{}))
+	}
+
+	// Float64 fields
+	if v, ok := d.GetOk("max_budget"); ok {
+		request.MaxBudget = floatPtr(v.(float64))
+	}
+	if v, ok := d.GetOk("soft_budget"); ok {
+		request.SoftBudget = floatPtr(v.(float64))
+	}
+	if v, ok := d.GetOk("spend"); ok {
+		request.Spend = floatPtr(v.(float64))
+	}
+
+	// Int fields
+	if v, ok := d.GetOk("max_parallel_requests"); ok {
+		request.MaxParallelRequests = intPtr(v.(int))
+	}
+	if v, ok := d.GetOk("tpm_limit"); ok {
+		request.TPMLimit = intPtr(v.(int))
+	}
+	if v, ok := d.GetOk("rpm_limit"); ok {
+		request.RPMLimit = intPtr(v.(int))
+	}
+
+	// Bool fields - use Get() to handle false values properly
+	request.Blocked = d.Get("blocked").(bool)
+	request.SendInviteEmail = d.Get("send_invite_email").(bool)
+
+	// Map fields
+	if v, ok := d.GetOk("metadata"); ok {
+		request.Metadata = v.(map[string]interface{})
+	}
+	if v, ok := d.GetOk("aliases"); ok {
+		request.Aliases = v.(map[string]interface{})
+	}
+	if v, ok := d.GetOk("permissions"); ok {
+		request.Permissions = v.(map[string]interface{})
+	}
+	if v, ok := d.GetOk("model_max_budget"); ok {
+		request.ModelMaxBudget = v.(map[string]interface{})
+	}
+	if v, ok := d.GetOk("model_rpm_limit"); ok {
+		request.ModelRPMLimit = v.(map[string]interface{})
+	}
+	if v, ok := d.GetOk("model_tpm_limit"); ok {
+		request.ModelTPMLimit = v.(map[string]interface{})
+	}
+	if v, ok := d.GetOk("enforced_params"); ok {
+		request.EnforcedParams = v.(map[string]interface{})
+	}
+
+	return request
+}
+
+// interfaceSliceToStringSlice converts []interface{} to []string
+func interfaceSliceToStringSlice(slice []interface{}) []string {
+	result := make([]string, len(slice))
+	for i, v := range slice {
+		if s, ok := v.(string); ok {
+			result[i] = s
 		}
+	}
+	return result
+}
+
+// Helper functions for creating pointers
+func stringPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
+
+func intPtr(i int) *int {
+	if i == 0 {
+		return nil
+	}
+	return &i
+}
+
+func floatPtr(f float64) *float64 {
+	if f == 0 {
+		return nil
+	}
+	return &f
+}
+
+func boolPtr(b bool) *bool {
+	return &b
+}
+
+// setKeyResourceDataFromGenerate sets resource data from a KeyGenerateResponse
+// This is used during creation when we have the full response including the sensitive key
+// Logic: Only set fields that aren't empty from the API Response, similar to setKeyResourceDataFromInfo
+func setKeyResourceDataFromGenerate(d *schema.ResourceData, response *KeyGenerateResponse) error {
+	// Map of all possible fields from API response
+	// Only set fields that have values from the API response
+	apiFields := map[string]interface{}{
+		// Sensitive fields - only available during creation
+		"key":       response.Key,
+		"token":     response.Token,
+		"token_id":  response.TokenID,
+		"key_name":  response.KeyName,
+		"budget_id": response.BudgetID,
+
+		// Configuration fields from response
+		"models":                 response.Models,
+		"spend":                  response.Spend,
+		"max_budget":             response.MaxBudget,
+		"user_id":                response.UserID,
+		"team_id":                response.TeamID,
+		"max_parallel_requests":  response.MaxParallelRequests,
+		"metadata":               response.Metadata,
+		"tpm_limit":              response.TPMLimit,
+		"rpm_limit":              response.RPMLimit,
+		"budget_duration":        response.BudgetDuration,
+		"allowed_cache_controls": response.AllowedCacheControls,
+		"soft_budget":            response.SoftBudget,
+		"key_alias":              response.KeyAlias,
+		"duration":               response.Duration,
+		"aliases":                response.Aliases,
+		"permissions":            response.Permissions,
+		"model_max_budget":       response.ModelMaxBudget,
+		"model_rpm_limit":        response.ModelRPMLimit,
+		"model_tpm_limit":        response.ModelTPMLimit,
+		"guardrails":             response.Guardrails,
+		"prompts":                response.Prompts,
+		"blocked":                response.Blocked,
+		"tags":                   response.Tags,
+		"send_invite_email":      response.SendInviteEmail,
+		"key_type":               response.KeyType,
+		"expires":                formatTimePtr(response.Expires),
+		"created_by":             response.CreatedBy,
+		"updated_by":             response.UpdatedBy,
+		"created_at":             formatTime(response.CreatedAt),
+		"updated_at":             formatTime(response.UpdatedAt),
+		"enforced_params":        response.EnforcedParams,
+	}
+
+	// Set fields from API if they have values
+	for field, apiValue := range apiFields {
+		// If API has a value, use it; otherwise don't set it
+		if shouldUseAPIValue(apiValue) {
+			if err := d.Set(field, apiValue); err != nil {
+				log.Printf("[WARN] Error setting %s: %s", field, err)
+				return fmt.Errorf("error setting %s: %s", field, err)
+			}
+		}
+		// If API doesn't have a value, we don't set it (preserves defaults or existing state)
 	}
 
 	return nil
 }
 
-func mapToKey(data map[string]interface{}) *Key {
-	key := &Key{}
-	for k, v := range data {
-		switch k {
-		case "key":
-			key.Key = v.(string)
-		case "models":
-			key.Models = v.([]string)
-		case "max_budget":
-			key.MaxBudget = v.(float64)
-		case "user_id":
-			key.UserID = v.(string)
-		case "team_id":
-			key.TeamID = v.(string)
-		case "max_parallel_requests":
-			key.MaxParallelRequests = v.(int)
-		case "metadata":
-			key.Metadata = v.(map[string]interface{})
-		case "tpm_limit":
-			key.TPMLimit = v.(int)
-		case "rpm_limit":
-			key.RPMLimit = v.(int)
-		case "budget_duration":
-			key.BudgetDuration = v.(string)
-		case "allowed_cache_controls":
-			key.AllowedCacheControls = v.([]string)
-		case "soft_budget":
-			key.SoftBudget = v.(float64)
-		case "key_alias":
-			key.KeyAlias = v.(string)
-		case "duration":
-			key.Duration = v.(string)
-		case "aliases":
-			key.Aliases = v.(map[string]interface{})
-		case "config":
-			key.Config = v.(map[string]interface{})
-		case "permissions":
-			key.Permissions = v.(map[string]interface{})
-		case "model_max_budget":
-			key.ModelMaxBudget = v.(map[string]interface{})
-		case "model_rpm_limit":
-			key.ModelRPMLimit = v.(map[string]interface{})
-		case "model_tpm_limit":
-			key.ModelTPMLimit = v.(map[string]interface{})
-		case "guardrails":
-			key.Guardrails = v.([]string)
-		case "blocked":
-			key.Blocked = v.(bool)
-		case "tags":
-			key.Tags = v.([]string)
-		case "send_invite_email":
-			key.SendInviteEmail = v.(bool)
-		case "key_type":
-			key.KeyType = v.(string)
-		}
+// setKeyResourceDataFromInfo sets resource data from a KeyInfoResponse
+// Logic: If API has the field, use it; otherwise preserve what's in the state
+func setKeyResourceDataFromInfo(d *schema.ResourceData, response *KeyInfoResponse) error {
+	info := response.Info
+
+	// Map of all possible fields from API response that exist in the schema
+	// If the API field is not nil/empty, we use it; otherwise we preserve state
+	apiFields := map[string]interface{}{
+		"key_name":               info.KeyName,
+		"key_alias":              info.KeyAlias,
+		"spend":                  info.Spend,
+		"models":                 info.Models,
+		"aliases":                info.Aliases,
+		"user_id":                info.UserID,
+		"team_id":                info.TeamID,
+		"permissions":            info.Permissions,
+		"max_parallel_requests":  info.MaxParallelRequests,
+		"metadata":               info.Metadata,
+		"blocked":                info.Blocked,
+		"tpm_limit":              info.TPMLimit,
+		"rpm_limit":              info.RPMLimit,
+		"max_budget":             info.MaxBudget,
+		"budget_duration":        info.BudgetDuration,
+		"allowed_cache_controls": info.AllowedCacheControls,
+		"model_max_budget":       info.ModelMaxBudget,
+		"budget_id":              info.BudgetID,
+		"expires":                formatTimePtr(info.Expires),
+		"created_by":             info.CreatedBy,
+		"updated_by":             info.UpdatedBy,
+		"created_at":             formatTime(info.CreatedAt),
+		"updated_at":             formatTime(info.UpdatedAt),
 	}
-	return key
+
+	// Fields that should never be overridden from API (preserve state)
+	onlyCreationFields := []string{
+		"key",      // Sensitive - only available during creation
+		"token",    // Sensitive - only available during creation
+		"token_id", // Sensitive - only available during creation
+		"key_type", // Only available during creation
+	}
+
+	// Set fields from API if they have values, otherwise preserve state
+	for field, apiValue := range apiFields {
+		// Skip sensitive fields - always preserve from state
+		if contains(onlyCreationFields, field) {
+			continue
+		}
+
+		// If API has a value, use it; otherwise preserve state
+		if shouldUseAPIValue(apiValue) {
+			if err := d.Set(field, apiValue); err != nil {
+				log.Printf("[WARN] Error setting %s: %s", field, err)
+				return fmt.Errorf("error setting %s: %s", field, err)
+			}
+		}
+		// If API doesn't have a value, we implicitly preserve the state by not calling d.Set()
+	}
+
+	return nil
 }
 
-func buildKeyForCreation(data map[string]interface{}) *Key {
-	return mapToKey(data)
+// shouldUseAPIValue determines if we should use the API value or preserve state
+func shouldUseAPIValue(apiValue interface{}) bool {
+	if apiValue == nil {
+		return false
+	}
+
+	switch v := apiValue.(type) {
+	case string:
+		return v != ""
+	case *string:
+		return v != nil && *v != ""
+	case []string:
+		return len(v) > 0
+	case *[]string:
+		return v != nil && len(*v) > 0
+	case map[string]interface{}:
+		return len(v) > 0
+	case *map[string]interface{}:
+		return v != nil && len(*v) > 0
+	case int:
+		return true // Always use int values from API, including 0
+	case *int:
+		return v != nil
+	case float64:
+		return true // Always use float64 values from API, including 0.0
+	case *float64:
+		return v != nil
+	case bool:
+		return true // Always use bool values from API
+	case *bool:
+		return v != nil
+	default:
+		return apiValue != nil
+	}
+}
+
+// contains checks if a slice contains a string
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
+
+// Helper functions for time formatting
+func formatTime(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Format(time.RFC3339)
+}
+
+func formatTimePtr(t *time.Time) string {
+	if t == nil || t.IsZero() {
+		return ""
+	}
+	return t.Format(time.RFC3339)
 }

@@ -3,188 +3,236 @@ package key
 import (
 	"context"
 	"fmt"
-	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 	"net/http"
+
+	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 )
 
-func createKey(ctx context.Context, c *litellm.Client, key *Key) (*Key, error) {
-	resp, err := c.SendRequest(ctx, http.MethodPost, "/key/generate", key)
+func createKey(ctx context.Context, c *litellm.Client, request *KeyGenerateRequest) (*KeyGenerateResponse, error) {
+	response, err := litellm.SendRequestTyped[KeyGenerateRequest, KeyGenerateResponse](
+		ctx, c, http.MethodPost, "/key/generate", request,
+	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create key: %w", err)
 	}
 
-	return parseKeyResponse(resp)
+	return response, nil
 }
 
-func getKey(ctx context.Context, c *litellm.Client, keyID string) (*Key, error) {
-	resp, err := c.SendRequest(ctx, http.MethodGet, fmt.Sprintf("/key/info?key=%s", keyID), nil)
+func getKey(ctx context.Context, c *litellm.Client, keyID string) (*KeyInfoResponse, error) {
+	response, err := litellm.SendRequestTyped[interface{}, KeyInfoResponse](
+		ctx, c, http.MethodGet, fmt.Sprintf("/key/info?key=%s", keyID), nil,
+	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get key: %w", err)
 	}
 
-	return parseKeyResponse(resp)
+	return response, nil
 }
 
-func parseKeyResponse(resp map[string]interface{}) (*Key, error) {
-	if resp == nil {
-		return nil, fmt.Errorf("received nil response")
-	}
+func updateKey(ctx context.Context, c *litellm.Client, keyID string, request *KeyGenerateRequest) (*KeyGenerateResponse, error) {
+	// Add the key ID to the request for updates
+	updateRequest := *request
+	updateRequest.Key = &keyID
 
-	createdKey := &Key{}
-
-	for k, v := range resp {
-		if v == nil {
-			continue
-		}
-
-		switch k {
-		case "key":
-			if s, ok := v.(string); ok {
-				createdKey.Key = s
-			}
-		case "models":
-			if models, ok := v.([]interface{}); ok {
-				createdKey.Models = make([]string, len(models))
-				for i, model := range models {
-					if s, ok := model.(string); ok {
-						createdKey.Models[i] = s
-					}
-				}
-			}
-		case "spend":
-			if f, ok := v.(float64); ok {
-				createdKey.Spend = f
-			}
-		case "max_budget":
-			if f, ok := v.(float64); ok {
-				createdKey.MaxBudget = f
-			}
-		case "user_id":
-			if s, ok := v.(string); ok {
-				createdKey.UserID = s
-			}
-		case "team_id":
-			if s, ok := v.(string); ok {
-				createdKey.TeamID = s
-			}
-		case "max_parallel_requests":
-			if i, ok := v.(float64); ok {
-				createdKey.MaxParallelRequests = int(i)
-			}
-		case "metadata":
-			if m, ok := v.(map[string]interface{}); ok {
-				createdKey.Metadata = m
-			}
-		case "tpm_limit":
-			if i, ok := v.(float64); ok {
-				createdKey.TPMLimit = int(i)
-			}
-		case "rpm_limit":
-			if i, ok := v.(float64); ok {
-				createdKey.RPMLimit = int(i)
-			}
-		case "budget_duration":
-			if s, ok := v.(string); ok {
-				createdKey.BudgetDuration = s
-			}
-		case "soft_budget":
-			if f, ok := v.(float64); ok {
-				createdKey.SoftBudget = f
-			}
-		case "key_alias":
-			if s, ok := v.(string); ok {
-				createdKey.KeyAlias = s
-			}
-		case "duration":
-			if s, ok := v.(string); ok {
-				createdKey.Duration = s
-			}
-		case "aliases":
-			if m, ok := v.(map[string]interface{}); ok {
-				createdKey.Aliases = m
-			}
-		case "config":
-			if m, ok := v.(map[string]interface{}); ok {
-				createdKey.Config = m
-			}
-		case "permissions":
-			if m, ok := v.(map[string]interface{}); ok {
-				createdKey.Permissions = m
-			}
-		case "model_max_budget":
-			if m, ok := v.(map[string]interface{}); ok {
-				createdKey.ModelMaxBudget = m
-			}
-		case "model_rpm_limit":
-			if m, ok := v.(map[string]interface{}); ok {
-				createdKey.ModelRPMLimit = m
-			}
-		case "model_tpm_limit":
-			if m, ok := v.(map[string]interface{}); ok {
-				createdKey.ModelTPMLimit = m
-			}
-		case "guardrails":
-			if guardrails, ok := v.([]interface{}); ok {
-				createdKey.Guardrails = make([]string, len(guardrails))
-				for i, guardrail := range guardrails {
-					if s, ok := guardrail.(string); ok {
-						createdKey.Guardrails[i] = s
-					}
-				}
-			}
-		case "blocked":
-			if b, ok := v.(bool); ok {
-				createdKey.Blocked = b
-			}
-		case "tags":
-			if tags, ok := v.([]interface{}); ok {
-				createdKey.Tags = make([]string, len(tags))
-				for i, tag := range tags {
-					if s, ok := tag.(string); ok {
-						createdKey.Tags[i] = s
-					}
-				}
-			}
-		}
-	}
-
-	return createdKey, nil
-}
-
-func updateKey(ctx context.Context, c *litellm.Client, key *Key) (*Key, error) {
-	// Create a new map with only the fields that can be updated
-	updateData := map[string]interface{}{
-		"key":                   key.Key,
-		"models":                key.Models,
-		"max_budget":            key.MaxBudget,
-		"team_id":               key.TeamID,
-		"max_parallel_requests": key.MaxParallelRequests,
-		"metadata":              key.Metadata,
-		"tpm_limit":             key.TPMLimit,
-		"rpm_limit":             key.RPMLimit,
-		"budget_duration":       key.BudgetDuration,
-		"key_alias":             key.KeyAlias,
-		"aliases":               key.Aliases,
-		"permissions":           key.Permissions,
-		"model_max_budget":      key.ModelMaxBudget,
-		"model_rpm_limit":       key.ModelRPMLimit,
-		"model_tpm_limit":       key.ModelTPMLimit,
-		"guardrails":            key.Guardrails,
-		"blocked":               key.Blocked,
-	}
-
-	resp, err := c.SendRequest(ctx, http.MethodPost, "/key/update", updateData)
+	response, err := litellm.SendRequestTyped[KeyGenerateRequest, KeyGenerateResponse](
+		ctx, c, http.MethodPost, "/key/update", &updateRequest,
+	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to update key: %w", err)
 	}
 
-	return parseKeyResponse(resp)
+	return response, nil
 }
 
 func deleteKey(ctx context.Context, c *litellm.Client, keyID string) error {
-	payload := map[string]interface{}{
-		"keys": []string{keyID},
+	deleteRequest := struct {
+		Keys []string `json:"keys"`
+	}{
+		Keys: []string{keyID},
 	}
-	_, err := c.SendRequest(ctx, http.MethodPost, "/key/delete", payload)
-	return err
+
+	_, err := litellm.SendRequestTyped[struct {
+		Keys []string `json:"keys"`
+	}, interface{}](
+		ctx, c, http.MethodPost, "/key/delete", &deleteRequest,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to delete key: %w", err)
+	}
+
+	return nil
+}
+
+// convertInfoResponseToKey converts a KeyInfoResponse to the internal Key struct
+func convertInfoResponseToKey(response *KeyInfoResponse) *Key {
+	if response == nil {
+		return nil
+	}
+
+	info := response.Info
+	key := &Key{
+		Key:      response.Key, // Use the key from the top level
+		KeyAlias: safeStringDeref(info.KeyAlias),
+		KeyName:  info.KeyName,
+		Token:    response.Key, // The key field in info response is the token
+		TokenID:  response.Key, // Use key as token ID for consistency
+		BudgetID: safeStringDeref(info.BudgetID),
+
+		Models:               info.Models,
+		Duration:             "", // Not available in info response
+		UserID:               info.UserID,
+		TeamID:               safeStringDeref(info.TeamID),
+		MaxParallelRequests:  safeIntDeref(info.MaxParallelRequests),
+		Metadata:             info.Metadata,
+		TPMLimit:             safeIntDeref(info.TPMLimit),
+		RPMLimit:             safeIntDeref(info.RPMLimit),
+		BudgetDuration:       safeStringDeref(info.BudgetDuration),
+		AllowedCacheControls: info.AllowedCacheControls,
+		AllowedRoutes:        info.AllowedRoutes,
+		KeyType:              "", // Not available in info response
+
+		Spend:      info.Spend,
+		MaxBudget:  safeFloat64Deref(info.MaxBudget),
+		SoftBudget: 0, // Not directly available, could derive from soft_budget_cooldown
+
+		Aliases:          info.Aliases,
+		Config:           info.Config,
+		Permissions:      info.Permissions,
+		ObjectPermission: info.ObjectPermission,
+		ModelMaxBudget:   info.ModelMaxBudget,
+		ModelRPMLimit:    nil, // Not available in info response
+		ModelTPMLimit:    nil, // Not available in info response
+		EnforcedParams:   nil, // Not available in info response
+
+		Guardrails:      nil, // Not available in info response
+		Prompts:         nil, // Not available in info response
+		Blocked:         safeBoolDeref(info.Blocked),
+		Tags:            nil, // Not available in info response
+		SendInviteEmail: false,
+
+		Expires:   info.Expires,
+		CreatedBy: info.CreatedBy,
+		UpdatedBy: info.UpdatedBy,
+		CreatedAt: &info.CreatedAt,
+		UpdatedAt: &info.UpdatedAt,
+
+		LitellmBudgetTable: info.LitellmBudgetTable,
+	}
+
+	return key
+}
+
+// convertKeyToRequest converts the internal Key struct to a KeyGenerateRequest
+func convertKeyToRequest(key *Key) *KeyGenerateRequest {
+	if key == nil {
+		return nil
+	}
+
+	request := &KeyGenerateRequest{
+		Duration: safeStringPtr(key.Duration),
+		KeyAlias: safeStringPtr(key.KeyAlias),
+		Key:      safeStringPtr(key.Key),
+		TeamID:   safeStringPtr(key.TeamID),
+		UserID:   safeStringPtr(key.UserID),
+		BudgetID: safeStringPtr(key.BudgetID),
+		KeyType:  safeStringPtr(key.KeyType),
+
+		Models:               key.Models,
+		Aliases:              key.Aliases,
+		Permissions:          key.Permissions,
+		AllowedCacheControls: key.AllowedCacheControls,
+		Guardrails:           key.Guardrails,
+		Prompts:              key.Prompts,
+		Tags:                 key.Tags,
+
+		Spend:               safeFloat64Ptr(key.Spend),
+		MaxBudget:           safeFloat64Ptr(key.MaxBudget),
+		SoftBudget:          safeFloat64Ptr(key.SoftBudget),
+		BudgetDuration:      safeStringPtr(key.BudgetDuration),
+		MaxParallelRequests: safeIntPtr(key.MaxParallelRequests),
+		RPMLimit:            safeIntPtr(key.RPMLimit),
+		TPMLimit:            safeIntPtr(key.TPMLimit),
+		ModelMaxBudget:      key.ModelMaxBudget,
+		ModelRPMLimit:       key.ModelRPMLimit,
+		ModelTPMLimit:       key.ModelTPMLimit,
+
+		Metadata:        key.Metadata,
+		SendInviteEmail: key.SendInviteEmail,
+		Blocked:         key.Blocked,
+		EnforcedParams:  key.EnforcedParams,
+	}
+
+	return request
+}
+
+// Helper functions for safe pointer operations
+func safeStringDeref(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func safeStringPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
+
+func safeIntDeref(i *int) int {
+	if i == nil {
+		return 0
+	}
+	return *i
+}
+
+func safeIntPtr(i int) *int {
+	if i == 0 {
+		return nil
+	}
+	return &i
+}
+
+func safeFloat64Deref(f *float64) float64 {
+	if f == nil {
+		return 0
+	}
+	return *f
+}
+
+func safeFloat64Ptr(f float64) *float64 {
+	if f == 0 {
+		return nil
+	}
+	return &f
+}
+
+func safeBoolDeref(b *bool) bool {
+	if b == nil {
+		return false
+	}
+	return *b
+}
+
+func safeBoolPtr(b bool) *bool {
+	if !b {
+		return nil
+	}
+	return &b
+}
+
+func safeStringSliceDeref(s *[]string) []string {
+	if s == nil {
+		return nil
+	}
+	return *s
+}
+
+func safeMapDeref(m *map[string]interface{}) map[string]interface{} {
+	if m == nil {
+		return nil
+	}
+	return *m
 }
