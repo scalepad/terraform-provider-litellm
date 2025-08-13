@@ -7,8 +7,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type Client struct {
@@ -46,10 +47,17 @@ func (c *Client) SendRequest(ctx context.Context, method, path string, body inte
 		if err != nil {
 			return nil, fmt.Errorf("error marshaling request body: %v", err)
 		}
-		log.Printf("Making %s request to %s with body:\n%s", method, url, string(jsonBody))
+		tflog.Debug(ctx, "Making request with body", map[string]interface{}{
+			"method": method,
+			"url":    url,
+			"body":   string(jsonBody),
+		})
 		req, err = http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(jsonBody))
 	} else {
-		log.Printf("Making %s request to %s", method, url)
+		tflog.Debug(ctx, "Making request", map[string]interface{}{
+			"method": method,
+			"url":    url,
+		})
 		req, err = http.NewRequestWithContext(ctx, method, url, nil)
 	}
 
@@ -72,8 +80,10 @@ func (c *Client) SendRequest(ctx context.Context, method, path string, body inte
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
 
-	log.Printf("Response status: %d", resp.StatusCode)
-	log.Printf("Response body: %s", string(bodyBytes))
+	tflog.Debug(ctx, "Received response", map[string]interface{}{
+		"status_code": resp.StatusCode,
+		"body":        string(bodyBytes),
+	})
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, string(bodyBytes))
@@ -102,10 +112,17 @@ func SendRequestTyped[TRequest any, TResponse any](ctx context.Context, c *Clien
 		if err != nil {
 			return nil, fmt.Errorf("error marshaling request body: %v", err)
 		}
-		log.Printf("Making %s request to %s with body:\n%s", method, url, string(jsonBody))
+		tflog.Debug(ctx, "Making typed request with body", map[string]interface{}{
+			"method": method,
+			"url":    url,
+			"body":   string(jsonBody),
+		})
 		req, err = http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(jsonBody))
 	} else {
-		log.Printf("Making %s request to %s", method, url)
+		tflog.Debug(ctx, "Making typed request", map[string]interface{}{
+			"method": method,
+			"url":    url,
+		})
 		req, err = http.NewRequestWithContext(ctx, method, url, nil)
 	}
 
@@ -128,8 +145,10 @@ func SendRequestTyped[TRequest any, TResponse any](ctx context.Context, c *Clien
 		return nil, fmt.Errorf("error reading response body: %v", err)
 	}
 
-	log.Printf("Response status: %d", resp.StatusCode)
-	log.Printf("Response body: %s", string(bodyBytes))
+	tflog.Debug(ctx, "Received typed response", map[string]interface{}{
+		"status_code": resp.StatusCode,
+		"body":        string(bodyBytes),
+	})
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API request failed with status code %d: %s", resp.StatusCode, string(bodyBytes))
