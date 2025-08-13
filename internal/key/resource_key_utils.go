@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/scalepad/terraform-provider-litellm/internal/utils"
 )
 
 // buildKeyGenerateRequest creates a KeyGenerateRequest directly from ResourceData
@@ -14,25 +15,25 @@ func buildKeyGenerateRequest(d *schema.ResourceData) *KeyGenerateRequest {
 
 	// String fields
 	if v, ok := d.GetOk("duration"); ok {
-		request.Duration = stringPtr(v.(string))
+		request.Duration = utils.StringPtr(v.(string))
 	}
 	if v, ok := d.GetOk("key_alias"); ok {
-		request.KeyAlias = stringPtr(v.(string))
+		request.KeyAlias = utils.StringPtr(v.(string))
 	}
 	if v, ok := d.GetOk("user_id"); ok {
-		request.UserID = stringPtr(v.(string))
+		request.UserID = utils.StringPtr(v.(string))
 	}
 	if v, ok := d.GetOk("team_id"); ok {
-		request.TeamID = stringPtr(v.(string))
+		request.TeamID = utils.StringPtr(v.(string))
 	}
 	if v, ok := d.GetOk("budget_id"); ok {
-		request.BudgetID = stringPtr(v.(string))
+		request.BudgetID = utils.StringPtr(v.(string))
 	}
 	if v, ok := d.GetOk("key_type"); ok {
-		request.KeyType = stringPtr(v.(string))
+		request.KeyType = utils.StringPtr(v.(string))
 	}
 	if v, ok := d.GetOk("budget_duration"); ok {
-		request.BudgetDuration = stringPtr(v.(string))
+		request.BudgetDuration = utils.StringPtr(v.(string))
 	}
 
 	// String slice fields
@@ -54,24 +55,24 @@ func buildKeyGenerateRequest(d *schema.ResourceData) *KeyGenerateRequest {
 
 	// Float64 fields
 	if v, ok := d.GetOk("max_budget"); ok {
-		request.MaxBudget = floatPtr(v.(float64))
+		request.MaxBudget = utils.FloatPtr(v.(float64))
 	}
 	if v, ok := d.GetOk("soft_budget"); ok {
-		request.SoftBudget = floatPtr(v.(float64))
+		request.SoftBudget = utils.FloatPtr(v.(float64))
 	}
 	if v, ok := d.GetOk("spend"); ok {
-		request.Spend = floatPtr(v.(float64))
+		request.Spend = utils.FloatPtr(v.(float64))
 	}
 
 	// Int fields
 	if v, ok := d.GetOk("max_parallel_requests"); ok {
-		request.MaxParallelRequests = intPtr(v.(int))
+		request.MaxParallelRequests = utils.IntPtr(v.(int))
 	}
 	if v, ok := d.GetOk("tpm_limit"); ok {
-		request.TPMLimit = intPtr(v.(int))
+		request.TPMLimit = utils.IntPtr(v.(int))
 	}
 	if v, ok := d.GetOk("rpm_limit"); ok {
-		request.RPMLimit = intPtr(v.(int))
+		request.RPMLimit = utils.IntPtr(v.(int))
 	}
 
 	// Bool fields - use Get() to handle false values properly
@@ -112,37 +113,37 @@ func buildKeyUpdateRequest(d *schema.ResourceData) *KeyGenerateRequest {
 	// String fields - only include if changed
 	if d.HasChange("duration") {
 		if v, ok := d.GetOk("duration"); ok {
-			request.Duration = stringPtr(v.(string))
+			request.Duration = utils.StringPtr(v.(string))
 		}
 	}
 	if d.HasChange("key_alias") {
 		if v, ok := d.GetOk("key_alias"); ok {
-			request.KeyAlias = stringPtr(v.(string))
+			request.KeyAlias = utils.StringPtr(v.(string))
 		}
 	}
 	if d.HasChange("user_id") {
 		if v, ok := d.GetOk("user_id"); ok {
-			request.UserID = stringPtr(v.(string))
+			request.UserID = utils.StringPtr(v.(string))
 		}
 	}
 	if d.HasChange("team_id") {
 		if v, ok := d.GetOk("team_id"); ok {
-			request.TeamID = stringPtr(v.(string))
+			request.TeamID = utils.StringPtr(v.(string))
 		}
 	}
 	if d.HasChange("budget_id") {
 		if v, ok := d.GetOk("budget_id"); ok {
-			request.BudgetID = stringPtr(v.(string))
+			request.BudgetID = utils.StringPtr(v.(string))
 		}
 	}
 	if d.HasChange("key_type") {
 		if v, ok := d.GetOk("key_type"); ok {
-			request.KeyType = stringPtr(v.(string))
+			request.KeyType = utils.StringPtr(v.(string))
 		}
 	}
 	if d.HasChange("budget_duration") {
 		if v, ok := d.GetOk("budget_duration"); ok {
-			request.BudgetDuration = stringPtr(v.(string))
+			request.BudgetDuration = utils.StringPtr(v.(string))
 		}
 	}
 
@@ -176,34 +177,34 @@ func buildKeyUpdateRequest(d *schema.ResourceData) *KeyGenerateRequest {
 	// Float64 fields - only include if changed
 	if d.HasChange("max_budget") {
 		if v, ok := d.GetOk("max_budget"); ok {
-			request.MaxBudget = floatPtr(v.(float64))
+			request.MaxBudget = utils.FloatPtr(v.(float64))
 		}
 	}
 	if d.HasChange("soft_budget") {
 		if v, ok := d.GetOk("soft_budget"); ok {
-			request.SoftBudget = floatPtr(v.(float64))
+			request.SoftBudget = utils.FloatPtr(v.(float64))
 		}
 	}
 	if d.HasChange("spend") {
 		if v, ok := d.GetOk("spend"); ok {
-			request.Spend = floatPtr(v.(float64))
+			request.Spend = utils.FloatPtr(v.(float64))
 		}
 	}
 
 	// Int fields - only include if changed
 	if d.HasChange("max_parallel_requests") {
 		if v, ok := d.GetOk("max_parallel_requests"); ok {
-			request.MaxParallelRequests = intPtr(v.(int))
+			request.MaxParallelRequests = utils.IntPtr(v.(int))
 		}
 	}
 	if d.HasChange("tpm_limit") {
 		if v, ok := d.GetOk("tpm_limit"); ok {
-			request.TPMLimit = intPtr(v.(int))
+			request.TPMLimit = utils.IntPtr(v.(int))
 		}
 	}
 	if d.HasChange("rpm_limit") {
 		if v, ok := d.GetOk("rpm_limit"); ok {
-			request.RPMLimit = intPtr(v.(int))
+			request.RPMLimit = utils.IntPtr(v.(int))
 		}
 	}
 
@@ -266,32 +267,6 @@ func interfaceSliceToStringSlice(slice []interface{}) []string {
 	return result
 }
 
-// Helper functions for creating pointers
-func stringPtr(s string) *string {
-	if s == "" {
-		return nil
-	}
-	return &s
-}
-
-func intPtr(i int) *int {
-	if i == 0 {
-		return nil
-	}
-	return &i
-}
-
-func floatPtr(f float64) *float64 {
-	if f == 0 {
-		return nil
-	}
-	return &f
-}
-
-func boolPtr(b bool) *bool {
-	return &b
-}
-
 // setKeyResourceDataFromGenerate sets resource data from a KeyGenerateResponse
 // This is used during creation when we have the full response including the sensitive key
 // Logic: Only set fields that aren't empty from the API Response, similar to setKeyResourceDataFromInfo
@@ -343,7 +318,7 @@ func setKeyResourceDataFromGenerate(d *schema.ResourceData, response *KeyGenerat
 	// Set fields from API if they have values
 	for field, apiValue := range apiFields {
 		// If API has a value, use it; otherwise don't set it
-		if shouldUseAPIValue(apiValue) {
+		if utils.ShouldUseAPIValue(apiValue) {
 			if err := d.Set(field, apiValue); err != nil {
 				log.Printf("[WARN] Error setting %s: %s", field, err)
 				return fmt.Errorf("error setting %s: %s", field, err)
@@ -404,7 +379,7 @@ func setKeyResourceDataFromInfo(d *schema.ResourceData, response *KeyInfoRespons
 		}
 
 		// If API has a value, use it; otherwise preserve state
-		if shouldUseAPIValue(apiValue) {
+		if utils.ShouldUseAPIValue(apiValue) {
 			if err := d.Set(field, apiValue); err != nil {
 				log.Printf("[WARN] Error setting %s: %s", field, err)
 				return fmt.Errorf("error setting %s: %s", field, err)

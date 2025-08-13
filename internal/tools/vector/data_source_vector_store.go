@@ -20,19 +20,19 @@ func dataSourceLiteLLMVectorStoreRead(ctx context.Context, d *schema.ResourceDat
 	c := m.(*litellm.Client)
 	vectorStoreID := d.Get("vector_store_id").(string)
 
-	vectorStore, err := getVectorStore(ctx, c, vectorStoreID)
+	vectorStoreInfoResponse, err := getVectorStore(ctx, c, vectorStoreID)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("failed to read vector store: %w", err))
 	}
 
-	if vectorStore == nil {
+	if vectorStoreInfoResponse == nil {
 		return diag.FromErr(fmt.Errorf("vector store '%s' not found", vectorStoreID))
 	}
 
 	// Set the data source ID to the vector store ID
-	d.SetId(vectorStore.VectorStoreID)
+	d.SetId(vectorStoreInfoResponse.VectorStore.VectorStoreID)
 
-	if err := setVectorStoreResourceData(d, vectorStore); err != nil {
+	if err := setVectorStoreResourceDataFromInfo(d, vectorStoreInfoResponse); err != nil {
 		return diag.FromErr(err)
 	}
 
