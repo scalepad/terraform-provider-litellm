@@ -17,6 +17,16 @@ func ResourceKey() *schema.Resource {
 		UpdateContext: resourceKeyUpdate,
 		DeleteContext: resourceKeyDelete,
 		Schema:        resourceKeySchema(),
+
+		// State migration configuration
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceKeyResourceV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: resourceKeyStateUpgradeV0,
+				Version: 0,
+			},
+		},
 	}
 }
 

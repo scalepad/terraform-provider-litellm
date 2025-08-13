@@ -82,7 +82,7 @@ resource "litellm_key" "advanced_key" {
 
 
   key_alias = "advanced-test-key-${random_string.advanced_suffix.result}"
-  duration  = "60d"
+  duration  = "90d"
   blocked   = false
 
 

@@ -141,59 +141,83 @@ type KeyInfo struct {
 	ObjectPermission     interface{}            `json:"object_permission"`
 }
 
-// Key represents the internal key structure used by the provider
-type Key struct {
-	// Core key fields
-	Key      string `json:"key,omitempty"`
-	KeyAlias string `json:"key_alias,omitempty"`
-	KeyName  string `json:"key_name,omitempty"`
-	Token    string `json:"token,omitempty"`
-	TokenID  string `json:"token_id,omitempty"`
-	BudgetID string `json:"budget_id,omitempty"`
+// KeyListRequest represents the request for listing keys
+type KeyListRequest struct {
+	Page             int    `json:"page,omitempty"`
+	Size             int    `json:"size,omitempty"`
+	KeyAlias         string `json:"key_alias,omitempty"`
+	ReturnFullObject bool   `json:"return_full_object,omitempty"`
+	IncludeTeamKeys  bool   `json:"include_team_keys,omitempty"`
+	SortOrder        string `json:"sort_order,omitempty"`
+}
 
-	// Configuration fields
+// KeyListResponse represents the response from the /key/list endpoint
+type KeyListResponse struct {
+	Keys        []KeyListItem `json:"keys"`
+	TotalCount  int           `json:"total_count"`
+	CurrentPage int           `json:"current_page"`
+	TotalPages  int           `json:"total_pages"`
+}
+
+// KeyListItem represents a single key item in the list response
+type KeyListItem struct {
+	Token                string                 `json:"token"`
+	KeyName              string                 `json:"key_name"`
+	KeyAlias             *string                `json:"key_alias"`
+	Spend                float64                `json:"spend"`
+	MaxBudget            *float64               `json:"max_budget"`
+	Expires              *time.Time             `json:"expires"`
 	Models               []string               `json:"models"`
-	Duration             string                 `json:"duration,omitempty"`
-	UserID               string                 `json:"user_id,omitempty"`
-	TeamID               string                 `json:"team_id,omitempty"`
-	MaxParallelRequests  int                    `json:"max_parallel_requests,omitempty"`
-	Metadata             map[string]interface{} `json:"metadata,omitempty"`
-	TPMLimit             int                    `json:"tpm_limit,omitempty"`
-	RPMLimit             int                    `json:"rpm_limit,omitempty"`
-	BudgetDuration       string                 `json:"budget_duration,omitempty"`
-	AllowedCacheControls []string               `json:"allowed_cache_controls,omitempty"`
-	AllowedRoutes        []string               `json:"allowed_routes,omitempty"`
-	KeyType              string                 `json:"key_type,omitempty"`
-
-	// Budget and spending fields
-	Spend      float64 `json:"spend,omitempty"`
-	MaxBudget  float64 `json:"max_budget,omitempty"`
-	SoftBudget float64 `json:"soft_budget,omitempty"`
-
-	// Advanced configuration
-	Aliases          map[string]interface{} `json:"aliases,omitempty"`
-	Config           map[string]interface{} `json:"config,omitempty"`
-	Permissions      map[string]interface{} `json:"permissions,omitempty"`
-	ObjectPermission interface{}            `json:"object_permission,omitempty"`
-	ModelMaxBudget   map[string]interface{} `json:"model_max_budget,omitempty"`
-	ModelRPMLimit    map[string]interface{} `json:"model_rpm_limit,omitempty"`
-	ModelTPMLimit    map[string]interface{} `json:"model_tpm_limit,omitempty"`
-	EnforcedParams   map[string]interface{} `json:"enforced_params,omitempty"`
-
-	// Security and control fields
-	Guardrails      []string `json:"guardrails,omitempty"`
-	Prompts         []string `json:"prompts,omitempty"`
-	Blocked         bool     `json:"blocked"`
-	Tags            []string `json:"tags,omitempty"`
-	SendInviteEmail bool     `json:"send_invite_email,omitempty"`
-
-	// Timestamps and audit fields
-	Expires   *time.Time `json:"expires,omitempty"`
-	CreatedBy string     `json:"created_by,omitempty"`
-	UpdatedBy string     `json:"updated_by,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-
-	// Budget table reference
-	LitellmBudgetTable interface{} `json:"litellm_budget_table,omitempty"`
+	Aliases              map[string]interface{} `json:"aliases"`
+	Config               map[string]interface{} `json:"config"`
+	UserID               string                 `json:"user_id"`
+	TeamID               *string                `json:"team_id"`
+	MaxParallelRequests  *int                   `json:"max_parallel_requests"`
+	Metadata             map[string]interface{} `json:"metadata"`
+	TPMLimit             *int                   `json:"tpm_limit"`
+	RPMLimit             *int                   `json:"rpm_limit"`
+	BudgetDuration       *string                `json:"budget_duration"`
+	BudgetResetAt        *time.Time             `json:"budget_reset_at"`
+	AllowedCacheControls []string               `json:"allowed_cache_controls"`
+	AllowedRoutes        []string               `json:"allowed_routes"`
+	Permissions          map[string]interface{} `json:"permissions"`
+	ModelSpend           map[string]interface{} `json:"model_spend"`
+	ModelMaxBudget       map[string]interface{} `json:"model_max_budget"`
+	SoftBudgetCooldown   bool                   `json:"soft_budget_cooldown"`
+	Blocked              *bool                  `json:"blocked"`
+	LitellmBudgetTable   interface{}            `json:"litellm_budget_table"`
+	OrgID                *string                `json:"org_id"`
+	CreatedAt            time.Time              `json:"created_at"`
+	CreatedBy            string                 `json:"created_by"`
+	UpdatedAt            time.Time              `json:"updated_at"`
+	UpdatedBy            string                 `json:"updated_by"`
+	ObjectPermissionID   *string                `json:"object_permission_id"`
+	ObjectPermission     interface{}            `json:"object_permission"`
+	TeamSpend            *float64               `json:"team_spend"`
+	TeamAlias            *string                `json:"team_alias"`
+	TeamTPMLimit         *int                   `json:"team_tpm_limit"`
+	TeamRPMLimit         *int                   `json:"team_rpm_limit"`
+	TeamMaxBudget        *float64               `json:"team_max_budget"`
+	TeamModels           []string               `json:"team_models"`
+	TeamBlocked          bool                   `json:"team_blocked"`
+	SoftBudget           *float64               `json:"soft_budget"`
+	TeamModelAliases     interface{}            `json:"team_model_aliases"`
+	TeamMemberSpend      *float64               `json:"team_member_spend"`
+	TeamMember           interface{}            `json:"team_member"`
+	TeamMetadata         interface{}            `json:"team_metadata"`
+	EndUserID            *string                `json:"end_user_id"`
+	EndUserTPMLimit      *int                   `json:"end_user_tpm_limit"`
+	EndUserRPMLimit      *int                   `json:"end_user_rpm_limit"`
+	EndUserMaxBudget     *float64               `json:"end_user_max_budget"`
+	LastRefreshedAt      *time.Time             `json:"last_refreshed_at"`
+	APIKey               *string                `json:"api_key"`
+	UserRole             *string                `json:"user_role"`
+	AllowedModelRegion   *string                `json:"allowed_model_region"`
+	ParentOtelSpan       *string                `json:"parent_otel_span"`
+	RPMLimitPerModel     interface{}            `json:"rpm_limit_per_model"`
+	TPMLimitPerModel     interface{}            `json:"tpm_limit_per_model"`
+	UserTPMLimit         *int                   `json:"user_tpm_limit"`
+	UserRPMLimit         *int                   `json:"user_rpm_limit"`
+	UserEmail            *string                `json:"user_email"`
+	RequestRoute         *string                `json:"request_route"`
 }

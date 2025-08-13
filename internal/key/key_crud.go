@@ -64,175 +64,32 @@ func deleteKey(ctx context.Context, c *litellm.Client, keyID string) error {
 	return nil
 }
 
-// convertInfoResponseToKey converts a KeyInfoResponse to the internal Key struct
-func convertInfoResponseToKey(response *KeyInfoResponse) *Key {
-	if response == nil {
-		return nil
+// listKeys queries the /key/list endpoint to find keys by alias
+func listKeys(ctx context.Context, c *litellm.Client, keyAlias string) (*KeyListResponse, error) {
+	// Build query parameters
+	queryParams := fmt.Sprintf("?page=1&size=10&key_alias=%s&return_full_object=true&include_team_keys=false&sort_order=desc", keyAlias)
+
+	response, err := litellm.SendRequestTyped[interface{}, KeyListResponse](
+		ctx, c, http.MethodGet, "/key/list"+queryParams, nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list keys: %w", err)
 	}
 
-	info := response.Info
-	key := &Key{
-		Key:      response.Key, // Use the key from the top level
-		KeyAlias: safeStringDeref(info.KeyAlias),
-		KeyName:  info.KeyName,
-		Token:    response.Key, // The key field in info response is the token
-		TokenID:  response.Key, // Use key as token ID for consistency
-		BudgetID: safeStringDeref(info.BudgetID),
-
-		Models:               info.Models,
-		Duration:             "", // Not available in info response
-		UserID:               info.UserID,
-		TeamID:               safeStringDeref(info.TeamID),
-		MaxParallelRequests:  safeIntDeref(info.MaxParallelRequests),
-		Metadata:             info.Metadata,
-		TPMLimit:             safeIntDeref(info.TPMLimit),
-		RPMLimit:             safeIntDeref(info.RPMLimit),
-		BudgetDuration:       safeStringDeref(info.BudgetDuration),
-		AllowedCacheControls: info.AllowedCacheControls,
-		AllowedRoutes:        info.AllowedRoutes,
-		KeyType:              "", // Not available in info response
-
-		Spend:      info.Spend,
-		MaxBudget:  safeFloat64Deref(info.MaxBudget),
-		SoftBudget: 0, // Not directly available, could derive from soft_budget_cooldown
-
-		Aliases:          info.Aliases,
-		Config:           info.Config,
-		Permissions:      info.Permissions,
-		ObjectPermission: info.ObjectPermission,
-		ModelMaxBudget:   info.ModelMaxBudget,
-		ModelRPMLimit:    nil, // Not available in info response
-		ModelTPMLimit:    nil, // Not available in info response
-		EnforcedParams:   nil, // Not available in info response
-
-		Guardrails:      nil, // Not available in info response
-		Prompts:         nil, // Not available in info response
-		Blocked:         safeBoolDeref(info.Blocked),
-		Tags:            nil, // Not available in info response
-		SendInviteEmail: false,
-
-		Expires:   info.Expires,
-		CreatedBy: info.CreatedBy,
-		UpdatedBy: info.UpdatedBy,
-		CreatedAt: &info.CreatedAt,
-		UpdatedAt: &info.UpdatedAt,
-
-		LitellmBudgetTable: info.LitellmBudgetTable,
-	}
-
-	return key
+	return response, nil
 }
 
-// convertKeyToRequest converts the internal Key struct to a KeyGenerateRequest
-func convertKeyToRequest(key *Key) *KeyGenerateRequest {
-	if key == nil {
-		return nil
+// findKeyByAlias finds a key by its alias using the list endpoint
+func findKeyByAlias(ctx context.Context, c *litellm.Client, keyAlias string) (*KeyListItem, error) {
+	response, err := listKeys(ctx, c, keyAlias)
+	if err != nil {
+		return nil, err
 	}
 
-	request := &KeyGenerateRequest{
-		Duration: safeStringPtr(key.Duration),
-		KeyAlias: safeStringPtr(key.KeyAlias),
-		Key:      safeStringPtr(key.Key),
-		TeamID:   safeStringPtr(key.TeamID),
-		UserID:   safeStringPtr(key.UserID),
-		BudgetID: safeStringPtr(key.BudgetID),
-		KeyType:  safeStringPtr(key.KeyType),
-
-		Models:               key.Models,
-		Aliases:              key.Aliases,
-		Permissions:          key.Permissions,
-		AllowedCacheControls: key.AllowedCacheControls,
-		Guardrails:           key.Guardrails,
-		Prompts:              key.Prompts,
-		Tags:                 key.Tags,
-
-		Spend:               safeFloat64Ptr(key.Spend),
-		MaxBudget:           safeFloat64Ptr(key.MaxBudget),
-		SoftBudget:          safeFloat64Ptr(key.SoftBudget),
-		BudgetDuration:      safeStringPtr(key.BudgetDuration),
-		MaxParallelRequests: safeIntPtr(key.MaxParallelRequests),
-		RPMLimit:            safeIntPtr(key.RPMLimit),
-		TPMLimit:            safeIntPtr(key.TPMLimit),
-		ModelMaxBudget:      key.ModelMaxBudget,
-		ModelRPMLimit:       key.ModelRPMLimit,
-		ModelTPMLimit:       key.ModelTPMLimit,
-
-		Metadata:        key.Metadata,
-		SendInviteEmail: key.SendInviteEmail,
-		Blocked:         key.Blocked,
-		EnforcedParams:  key.EnforcedParams,
+	if len(response.Keys) == 0 {
+		return nil, fmt.Errorf("no key found with alias: %s", keyAlias)
 	}
 
-	return request
-}
-
-// Helper functions for safe pointer operations
-func safeStringDeref(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
-}
-
-func safeStringPtr(s string) *string {
-	if s == "" {
-		return nil
-	}
-	return &s
-}
-
-func safeIntDeref(i *int) int {
-	if i == nil {
-		return 0
-	}
-	return *i
-}
-
-func safeIntPtr(i int) *int {
-	if i == 0 {
-		return nil
-	}
-	return &i
-}
-
-func safeFloat64Deref(f *float64) float64 {
-	if f == nil {
-		return 0
-	}
-	return *f
-}
-
-func safeFloat64Ptr(f float64) *float64 {
-	if f == 0 {
-		return nil
-	}
-	return &f
-}
-
-func safeBoolDeref(b *bool) bool {
-	if b == nil {
-		return false
-	}
-	return *b
-}
-
-func safeBoolPtr(b bool) *bool {
-	if !b {
-		return nil
-	}
-	return &b
-}
-
-func safeStringSliceDeref(s *[]string) []string {
-	if s == nil {
-		return nil
-	}
-	return *s
-}
-
-func safeMapDeref(m *map[string]interface{}) map[string]interface{} {
-	if m == nil {
-		return nil
-	}
-	return *m
+	// Return the first matching key
+	return &response.Keys[0], nil
 }
