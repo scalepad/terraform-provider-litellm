@@ -40,7 +40,7 @@ func resourceKeyCreate(ctx context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(fmt.Errorf("error creating key: %s", err))
 	}
 
-	d.SetId(createdKeyResponse.Key)
+	d.SetId(createdKeyResponse.TokenID)
 
 	// Set the resource data with the created key information
 	// This includes the sensitive key which is only available during creation
