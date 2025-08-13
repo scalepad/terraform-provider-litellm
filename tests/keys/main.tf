@@ -65,6 +65,8 @@ resource "litellm_key" "advanced_key" {
     "claude-3-sonnet"
   ]
 
+  max_parallel_requests = 10
+
   max_budget      = 100.0
   soft_budget     = 80.0
   budget_duration = "30d"

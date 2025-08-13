@@ -64,7 +64,7 @@ func resourceKeyRead(ctx context.Context, d *schema.ResourceData, m interface{})
 func resourceKeyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*litellm.Client)
 
-	request := buildKeyGenerateRequest(d)
+	request := buildKeyUpdateRequest(d)
 
 	_, err := updateKey(ctx, c, d.Id(), request)
 	if err != nil {

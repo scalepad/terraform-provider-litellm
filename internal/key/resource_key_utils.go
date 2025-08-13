@@ -104,6 +104,157 @@ func buildKeyGenerateRequest(d *schema.ResourceData) *KeyGenerateRequest {
 	return request
 }
 
+// buildKeyUpdateRequest creates a KeyGenerateRequest with only changed fields
+// This is used for updates to avoid sending unchanged fields to the API
+func buildKeyUpdateRequest(d *schema.ResourceData) *KeyGenerateRequest {
+	request := &KeyGenerateRequest{}
+
+	// String fields - only include if changed
+	if d.HasChange("duration") {
+		if v, ok := d.GetOk("duration"); ok {
+			request.Duration = stringPtr(v.(string))
+		}
+	}
+	if d.HasChange("key_alias") {
+		if v, ok := d.GetOk("key_alias"); ok {
+			request.KeyAlias = stringPtr(v.(string))
+		}
+	}
+	if d.HasChange("user_id") {
+		if v, ok := d.GetOk("user_id"); ok {
+			request.UserID = stringPtr(v.(string))
+		}
+	}
+	if d.HasChange("team_id") {
+		if v, ok := d.GetOk("team_id"); ok {
+			request.TeamID = stringPtr(v.(string))
+		}
+	}
+	if d.HasChange("budget_id") {
+		if v, ok := d.GetOk("budget_id"); ok {
+			request.BudgetID = stringPtr(v.(string))
+		}
+	}
+	if d.HasChange("key_type") {
+		if v, ok := d.GetOk("key_type"); ok {
+			request.KeyType = stringPtr(v.(string))
+		}
+	}
+	if d.HasChange("budget_duration") {
+		if v, ok := d.GetOk("budget_duration"); ok {
+			request.BudgetDuration = stringPtr(v.(string))
+		}
+	}
+
+	// String slice fields - only include if changed
+	if d.HasChange("models") {
+		if v, ok := d.GetOk("models"); ok {
+			request.Models = interfaceSliceToStringSlice(v.([]interface{}))
+		}
+	}
+	if d.HasChange("allowed_cache_controls") {
+		if v, ok := d.GetOk("allowed_cache_controls"); ok {
+			request.AllowedCacheControls = interfaceSliceToStringSlice(v.([]interface{}))
+		}
+	}
+	if d.HasChange("guardrails") {
+		if v, ok := d.GetOk("guardrails"); ok {
+			request.Guardrails = interfaceSliceToStringSlice(v.([]interface{}))
+		}
+	}
+	if d.HasChange("prompts") {
+		if v, ok := d.GetOk("prompts"); ok {
+			request.Prompts = interfaceSliceToStringSlice(v.([]interface{}))
+		}
+	}
+	if d.HasChange("tags") {
+		if v, ok := d.GetOk("tags"); ok {
+			request.Tags = interfaceSliceToStringSlice(v.([]interface{}))
+		}
+	}
+
+	// Float64 fields - only include if changed
+	if d.HasChange("max_budget") {
+		if v, ok := d.GetOk("max_budget"); ok {
+			request.MaxBudget = floatPtr(v.(float64))
+		}
+	}
+	if d.HasChange("soft_budget") {
+		if v, ok := d.GetOk("soft_budget"); ok {
+			request.SoftBudget = floatPtr(v.(float64))
+		}
+	}
+	if d.HasChange("spend") {
+		if v, ok := d.GetOk("spend"); ok {
+			request.Spend = floatPtr(v.(float64))
+		}
+	}
+
+	// Int fields - only include if changed
+	if d.HasChange("max_parallel_requests") {
+		if v, ok := d.GetOk("max_parallel_requests"); ok {
+			request.MaxParallelRequests = intPtr(v.(int))
+		}
+	}
+	if d.HasChange("tpm_limit") {
+		if v, ok := d.GetOk("tpm_limit"); ok {
+			request.TPMLimit = intPtr(v.(int))
+		}
+	}
+	if d.HasChange("rpm_limit") {
+		if v, ok := d.GetOk("rpm_limit"); ok {
+			request.RPMLimit = intPtr(v.(int))
+		}
+	}
+
+	// Bool fields - only include if changed
+	if d.HasChange("blocked") {
+		request.Blocked = d.Get("blocked").(bool)
+	}
+	if d.HasChange("send_invite_email") {
+		request.SendInviteEmail = d.Get("send_invite_email").(bool)
+	}
+
+	// Map fields - only include if changed
+	if d.HasChange("metadata") {
+		if v, ok := d.GetOk("metadata"); ok {
+			request.Metadata = v.(map[string]interface{})
+		}
+	}
+	if d.HasChange("aliases") {
+		if v, ok := d.GetOk("aliases"); ok {
+			request.Aliases = v.(map[string]interface{})
+		}
+	}
+	if d.HasChange("permissions") {
+		if v, ok := d.GetOk("permissions"); ok {
+			request.Permissions = v.(map[string]interface{})
+		}
+	}
+	if d.HasChange("model_max_budget") {
+		if v, ok := d.GetOk("model_max_budget"); ok {
+			request.ModelMaxBudget = v.(map[string]interface{})
+		}
+	}
+	if d.HasChange("model_rpm_limit") {
+		if v, ok := d.GetOk("model_rpm_limit"); ok {
+			request.ModelRPMLimit = v.(map[string]interface{})
+		}
+	}
+	if d.HasChange("model_tpm_limit") {
+		if v, ok := d.GetOk("model_tpm_limit"); ok {
+			request.ModelTPMLimit = v.(map[string]interface{})
+		}
+	}
+	if d.HasChange("enforced_params") {
+		if v, ok := d.GetOk("enforced_params"); ok {
+			request.EnforcedParams = v.(map[string]interface{})
+		}
+	}
+
+	return request
+}
+
 // interfaceSliceToStringSlice converts []interface{} to []string
 func interfaceSliceToStringSlice(slice []interface{}) []string {
 	result := make([]string, len(slice))
