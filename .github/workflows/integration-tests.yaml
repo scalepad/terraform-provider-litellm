@@ -233,11 +233,19 @@ jobs:
 
           echo "Cleanup completed"
 
+      - name: Generate artifact name
+        if: always()
+        id: artifact-name
+        run: |
+          # Replace forward slashes with hyphens for artifact name
+          artifact_name=$(echo "${{ matrix.test-dir }}" | sed 's|/|-|g')
+          echo "name=integration-test-artifacts-${artifact_name}" >> $GITHUB_OUTPUT
+
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-test-artifacts-${{ matrix.test-dir }}
+          name: ${{ steps.artifact-name.outputs.name }}
           path: |
             ${{ matrix.test-dir }}/outputs.json
             ${{ matrix.test-dir }}/terraform.tfstate
