@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 )
@@ -19,7 +20,7 @@ func CreateUser(ctx context.Context, client *litellm.Client, req *UserCreateRequ
 
 // GetUser retrieves user information by user_id
 func GetUser(ctx context.Context, client *litellm.Client, userID string) (*User, error) {
-	path := fmt.Sprintf("/user/info?user_id=%s", userID)
+	path := fmt.Sprintf("/user/info?user_id=%s", url.QueryEscape(userID))
 	userResponse, err := litellm.SendRequestTyped[any, UserResponse](ctx, client, http.MethodGet, path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
