@@ -11,10 +11,34 @@ permissions:
   contents: read
 
 jobs:
-  integration-tests:
+  setup:
     runs-on: ubuntu-latest
-    # Set timeout to prevent hanging workflows
-    timeout-minutes: 30
+    timeout-minutes: 5
+    outputs:
+      test-dirs: ${{ steps.find-tests.outputs.test-dirs }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Find test directories
+        id: find-tests
+        run: |
+          # Find all test directories that contain main.tf files
+          test_dirs=$(find tests -name "main.tf" -type f | sed 's|/main.tf||' | jq -R -s -c 'split("\n")[:-1]')
+          echo "Found test directories: $test_dirs"
+          echo "test-dirs=$test_dirs" >> $GITHUB_OUTPUT
+
+  integration-tests:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: needs.setup.outputs.test-dirs != '[]'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        test-dir: ${{ fromJson(needs.setup.outputs.test-dirs) }}
 
     env:
       # Database configuration
@@ -63,10 +87,11 @@ jobs:
 
       - name: Build and install Terraform provider
         run: |
-          echo "Building & Installing Terraform  provider ..."
+          echo "Building & Installing Terraform provider ..."
           make install
         env:
           OS_ARCH: linux_amd64
+
       - name: Start LiteLLM with Docker Compose
         uses: hoverkraft-tech/compose-action@v2.3.0
         with:
@@ -136,113 +161,40 @@ jobs:
           echo "Key creation response: $response"
           echo "Test API key created successfully"
 
-      - name: Run User Integration Tests
+      - name: Run Integration Test - ${{ matrix.test-dir }}
         run: |
-          if [ -d "tests/users" ]; then
-            echo "Running user integration tests..."
-            cd tests/users
-            
-            echo "Initializing Terraform..."
-            terraform init
-            
-            echo "Validating Terraform configuration..."
-            terraform validate
-            
-            echo "Planning Terraform deployment..."
-            terraform plan -out=tfplan
-            
-            echo "Applying Terraform configuration..."
-            terraform apply -auto-approve tfplan
-            
-            echo "Verifying outputs..."
-            terraform output
-            
-            # Store outputs for verification
-            terraform output -json > outputs.json
-            
-            echo "Testing resource updates..."
-            terraform plan -out=tfplan-update
-            terraform apply -auto-approve tfplan-update
-            
-            echo "Testing resource destruction..."
-            terraform destroy -auto-approve
-            
-            cd ../..
-          else
-            echo "No user integration tests found at tests/users, skipping..."
-          fi
+          test_dir="${{ matrix.test-dir }}"
+          test_name=$(basename "$test_dir")
 
-      - name: Run Team Integration Tests
-        run: |
-          if [ -d "tests/teams" ]; then
-            echo "Running team integration tests..."
-            cd tests/teams
-            
-            terraform init
-            terraform validate
-            terraform plan -out=tfplan
-            terraform apply -auto-approve tfplan
-            terraform output
-            terraform output -json > outputs.json
-            terraform destroy -auto-approve
-            
-            cd ../..
-          else
-            echo "No team integration tests found at tests/teams, skipping..."
-          fi
+          echo "Running $test_name integration tests..."
+          cd "$test_dir"
 
-      - name: Run Key Integration Tests
-        run: |
-          if [ -d "tests/keys" ]; then
-            echo "Running key integration tests..."
-            cd tests/keys
-            
-            terraform init
-            terraform validate
-            terraform plan -out=tfplan
-            terraform apply -auto-approve tfplan
-            terraform output
-            terraform output -json > outputs.json
-            terraform destroy -auto-approve
-            
-            cd ../..
-          else
-            echo "No key integration tests found at tests/keys, skipping..."
-          fi
+          echo "Initializing Terraform..."
+          terraform init
 
-      - name: Run Model Integration Tests
-        run: |
-          if [ -d "tests/models" ]; then
-            echo "Running model integration tests..."
-            cd tests/models
-            
-            terraform init
-            terraform validate
-            terraform plan -out=tfplan
-            terraform apply -auto-approve tfplan
-            terraform output
-            terraform output -json > outputs.json
-            terraform destroy -auto-approve
-            
-            cd ../..
-          else
-            echo "No model integration tests found at tests/models, skipping..."
-          fi
+          echo "Validating Terraform configuration..."
+          terraform validate
 
-      - name: Run Data Source Integration Tests
-        run: |
-          if [ -d "tests/data-sources" ]; then
-            echo "Running data source integration tests..."
-            cd tests/data-sources
-            
-            terraform init
-            terraform validate
-            terraform plan
-            
-            cd ../..
-          else
-            echo "No data source integration tests found at tests/data-sources, skipping..."
-          fi
+          echo "Planning Terraform deployment..."
+          terraform plan -out=tfplan
+
+          echo "Applying Terraform configuration..."
+          terraform apply -auto-approve tfplan
+
+          echo "Verifying outputs..."
+          terraform output
+
+          # Store outputs for verification
+          terraform output -json > outputs.json
+
+          echo "Testing resource updates..."
+          terraform plan -out=tfplan-update
+          terraform apply -auto-approve tfplan-update
+
+          echo "Testing resource destruction..."
+          terraform destroy -auto-approve
+
+          cd - > /dev/null
 
       - name: Cleanup on failure
         if: failure()
@@ -262,29 +214,27 @@ jobs:
           find tests -name "terraform.tfstate" -exec echo "=== {} ===" \; -exec cat {} \; || true
 
           echo "=== Cleaning up any remaining resources ==="
-          for test_dir in tests/*/; do
-            if [ -d "$test_dir" ] && [ -f "$test_dir/main.tf" ]; then
-              echo "Cleaning up $test_dir"
-              cd "$test_dir"
-              terraform destroy -auto-approve || true
-              cd - > /dev/null
-            fi
-          done
+          test_dir="${{ matrix.test-dir }}"
+          if [ -d "$test_dir" ] && [ -f "$test_dir/main.tf" ]; then
+            echo "Cleaning up $test_dir"
+            cd "$test_dir"
+            terraform destroy -auto-approve || true
+            cd - > /dev/null
+          fi
 
       - name: Cleanup
         if: always()
         run: |
           echo "Cleaning up test environment..."
 
-          # Cleanup any remaining Terraform resources
-          for test_dir in tests/*/; do
-            if [ -d "$test_dir" ] && [ -f "$test_dir/main.tf" ]; then
-              echo "Cleaning up $test_dir"
-              cd "$test_dir"
-              terraform destroy -auto-approve || true
-              cd - > /dev/null
-            fi
-          done
+          # Cleanup any remaining Terraform resources for this test
+          test_dir="${{ matrix.test-dir }}"
+          if [ -d "$test_dir" ] && [ -f "$test_dir/main.tf" ]; then
+            echo "Cleaning up $test_dir"
+            cd "$test_dir"
+            terraform destroy -auto-approve || true
+            cd - > /dev/null
+          fi
 
           echo "Cleanup completed"
 
@@ -292,9 +242,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-test-artifacts
+          name: integration-test-artifacts-${{ matrix.test-dir }}
           path: |
-            tests/**/outputs.json
-            tests/**/terraform.tfstate
-            tests/**/*.log
+            ${{ matrix.test-dir }}/outputs.json
+            ${{ matrix.test-dir }}/terraform.tfstate
+            ${{ matrix.test-dir }}/*.log
           retention-days: 7
