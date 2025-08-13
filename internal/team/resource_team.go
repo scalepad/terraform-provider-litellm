@@ -2,12 +2,14 @@ package team
 
 import (
 	"context"
-	"log"
+	"regexp"
 
+	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
-	"github.com/scalepad/terraform-provider-litellm/internal/utils"
 )
 
 // ResourceTeam defines the schema for the LiteLLM team resource.
@@ -48,6 +50,11 @@ func ResourceTeam() *schema.Resource {
 			"budget_duration": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ValidateFunc: validation.StringMatch(
+					regexp.MustCompile(`^(\d+[smhd])$`),
+					"Budget duration must be in format: number followed by 's' (seconds), 'm' (minutes), 'h' (hours), or 'd' (days). Examples: '30s', '30m', '30h', '30d'",
+				),
+				Description: "Budget is reset at the end of specified duration. If not set, budget is never reset. You can set duration as seconds ('30s'), minutes ('30m'), hours ('30h'), days ('30d').",
 			},
 			"models": {
 				Type:     schema.TypeList,
@@ -75,27 +82,51 @@ func ResourceTeam() *schema.Resource {
 
 // resourceTeamCreate creates a new team in LiteLLM.
 func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] Creating LiteLLM team")
+	tflog.Info(ctx, "Creating LiteLLM team")
 
 	client := m.(*litellm.Client)
 
-	teamData := buildTeamDataForUtils(d)
-	team := buildTeamForCreation(teamData)
+	request := buildTeamCreateRequest(d)
 
-	teamResp, err := createTeam(ctx, client, team)
+	// Generate UUIDv7 if team_id is not provided
+	if request.TeamID == nil {
+		teamUUID, err := uuid.NewV7()
+		if err != nil {
+			return diag.Errorf("failed to generate team ID: %v", err)
+		}
+		teamID := teamUUID.String()
+		request.TeamID = &teamID
+	}
+
+	teamResp, err := createTeam(ctx, client, request)
 	if err != nil {
 		return diag.Errorf("error creating team: %v", err)
 	}
 
 	d.SetId(teamResp.TeamID)
-	log.Printf("[INFO] Created team with ID: %s", teamResp.TeamID)
+	tflog.Info(ctx, "Created team", map[string]interface{}{"team_id": teamResp.TeamID})
+
+	if _, ok := d.GetOk("team_member_permissions"); ok {
+		tflog.Info(ctx, "Updating team member permissions", map[string]interface{}{"team_id": d.Id()})
+
+		v := d.Get("team_member_permissions")
+		permissionsList := v.([]interface{})
+		permissions := make([]string, len(permissionsList))
+		for i, perm := range permissionsList {
+			permissions[i] = perm.(string)
+		}
+
+		if err := updateTeamPermissions(ctx, client, d.Id(), permissions); err != nil {
+			return diag.Errorf("error updating team permissions: %v", err)
+		}
+	}
 
 	return resourceTeamRead(ctx, d, m)
 }
 
 // resourceTeamRead reads the current state of a team from LiteLLM.
 func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] Reading LiteLLM team with ID: %s", d.Id())
+	tflog.Info(ctx, "Reading LiteLLM team", map[string]interface{}{"team_id": d.Id()})
 
 	client := m.(*litellm.Client)
 
@@ -105,7 +136,7 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	}
 
 	if teamResp == nil {
-		log.Printf("[WARN] Team %s not found, removing from state", d.Id())
+		tflog.Warn(ctx, "Team not found, removing from state", map[string]interface{}{"team_id": d.Id()})
 		d.SetId("")
 		return nil
 	}
@@ -117,49 +148,48 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	// Get and set permissions
 	permResp, err := getTeamPermissions(ctx, client, d.Id())
 	if err != nil {
-		log.Printf("[WARN] Error getting team permissions: %v", err)
+		tflog.Warn(ctx, "Error getting team permissions", map[string]interface{}{"error": err.Error()})
 	} else if permResp != nil {
 		d.Set("team_member_permissions", permResp.TeamMemberPermissions)
 	}
 
-	log.Printf("[INFO] Successfully read team with ID: %s", d.Id())
+	tflog.Info(ctx, "Successfully read team", map[string]interface{}{"team_id": d.Id()})
 	return nil
 }
 
 // resourceTeamUpdate updates an existing team in LiteLLM.
 func resourceTeamUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] Updating LiteLLM team with ID: %s", d.Id())
+	tflog.Info(ctx, "Updating LiteLLM team", map[string]interface{}{"team_id": d.Id()})
 
 	client := m.(*litellm.Client)
 
-	teamData := buildTeamDataForUtils(d)
-	team := buildTeamForCreation(teamData)
+	request := buildTeamUpdateRequest(d, d.Id())
 
-	_, err := updateTeam(ctx, client, team)
+	_, err := updateTeam(ctx, client, request)
 	if err != nil {
 		return diag.Errorf("error updating team: %v", err)
 	}
-
-	// Update permissions if they have changed
 	if d.HasChange("team_member_permissions") {
-		if _, ok := d.GetOk("team_member_permissions"); ok {
-			permData := make(map[string]interface{})
-			utils.GetStringListValue(d, "team_member_permissions", permData)
-			if permissions, exists := permData["team_member_permissions"].([]string); exists {
-				if err := updateTeamPermissions(ctx, client, d.Id(), permissions); err != nil {
-					return diag.Errorf("error updating team permissions: %v", err)
-				}
-			}
+		tflog.Info(ctx, "Updating team member permissions", map[string]interface{}{"team_id": d.Id()})
+
+		v := d.Get("team_member_permissions")
+		permissionsList := v.([]interface{})
+		permissions := make([]string, len(permissionsList))
+		for i, perm := range permissionsList {
+			permissions[i] = perm.(string)
+		}
+
+		if err := updateTeamPermissions(ctx, client, d.Id(), permissions); err != nil {
+			return diag.Errorf("error updating team permissions: %v", err)
 		}
 	}
-
-	log.Printf("[INFO] Successfully updated team with ID: %s", d.Id())
+	tflog.Info(ctx, "Successfully updated team", map[string]interface{}{"team_id": d.Id()})
 	return resourceTeamRead(ctx, d, m)
 }
 
 // resourceTeamDelete deletes a team from LiteLLM.
 func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Printf("[INFO] Deleting LiteLLM team with ID: %s", d.Id())
+	tflog.Info(ctx, "Deleting LiteLLM team", map[string]interface{}{"team_id": d.Id()})
 
 	client := m.(*litellm.Client)
 
@@ -167,6 +197,6 @@ func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.Errorf("error deleting team: %v", err)
 	}
 
-	log.Printf("[INFO] Successfully deleted team with ID: %s", d.Id())
+	tflog.Info(ctx, "Successfully deleted team", map[string]interface{}{"team_id": d.Id()})
 	return nil
 }

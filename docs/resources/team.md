@@ -22,20 +22,12 @@ resource "litellm_team" "engineering" {
     project    = "AI Research"
   }
 
-  blocked         = false
-  tpm_limit       = 500000
-  rpm_limit       = 5000
+  blocked             = false
+  tpm_limit           = 500000
+  rpm_limit           = 5000
   max_budget          = 1000.0
-  budget_duration     = "monthly"
+  budget_duration     = "30d"
   team_member_budget  = 100.0
-
-  # Team member permissions
-  team_member_permissions = [
-    "create_key",
-    "delete_key",
-    "view_spend",
-    "edit_team"
-  ]
 }
 ```
 
@@ -47,36 +39,29 @@ The following arguments are supported:
 
 - `organization_id` - (Optional) The ID of the organization this team belongs to.
 
-- `models` - (Optional) List of model names that this team can access.
+- `models` - (Optional) List of model names that this team can access. If empty, assumes all models are allowed.
 
-- `metadata` - (Optional) A map of metadata key-value pairs associated with the team.
+- `metadata` - (Optional) A map of metadata key-value pairs associated with the team. Store information for team tracking and organization.
 
-- `blocked` - (Optional) Whether the team is blocked from making requests. Default is `false`.
+- `blocked` - (Optional) Whether the team is blocked from making requests. Default is `false`. When blocked, all calls from keys with this team_id will be stopped.
 
-- `tpm_limit` - (Optional) Team-wide tokens per minute limit.
+- `tpm_limit` - (Optional) The TPM (Tokens Per Minute) limit for this team. All keys with this team_id will have at max this TPM limit.
 
-- `rpm_limit` - (Optional) Team-wide requests per minute limit.
+- `rpm_limit` - (Optional) The RPM (Requests Per Minute) limit for this team. All keys associated with this team_id will have at max this RPM limit.
 
-- `max_budget` - (Optional) Maximum budget allocated to the team.
+- `max_budget` - (Optional) The maximum budget allocated to the team. All keys for this team_id will have at max this max_budget.
 
-- `budget_duration` - (Optional) Duration for the budget cycle. Valid values are:
+- `budget_duration` - (Optional) The duration of the budget for the team. Budget is reset at the end of specified duration. If not set, budget is never reset. You can set duration as seconds ('30s'), minutes ('30m'), hours ('30h'), days ('30d'). Format must be: number followed by 's' (seconds), 'm' (minutes), 'h' (hours), or 'd' (days). Examples: '30s', '30m', '30h', '30d'.
 
-  - `daily`
-  - `weekly`
-  - `monthly`
-  - `yearly`
+- `team_member_permissions` - (Optional) A list of routes that non-admin team members can access. Example: `["/key/generate", "/key/update", "/key/delete"]`. Available permissions can be retrieved from the API endpoint `/team/permissions_list`.
 
-- `team_member_permissions` - (Optional) List of permissions granted to team members. Available permissions can be retrieved from the API endpoint `/team/permissions_list`.
-
-- `team_member_budget` - (Optional) Budget automatically given to a new team member.
-
-* `team_member_permissions` - (Optional) List of permissions granted to team members. This controls what actions team members can perform within the team context.
+- `team_member_budget` - (Optional) The maximum budget allocated to an individual team member. Budget automatically given to a new team member.
 
 ## Attribute Reference
 
 In addition to the arguments above, the following attributes are exported:
 
-- `id` - The unique identifier for the team.
+- `id` - The unique identifier for the team (team_id).
 
 ## Import
 
@@ -118,3 +103,16 @@ Terraform will show you the configuration that needs to be added to match the im
 ## Note on Team Members
 
 Team members are managed through the separate `litellm_team_member` resource. This allows for more granular control over team membership and permissions. See the `litellm_team_member` resource documentation for details on managing team members.
+
+## API Compatibility
+
+This resource supports all the features available in the LiteLLM team API, including:
+
+- Team creation with auto-generated UUIDs
+- Budget and rate limiting controls
+- Model access restrictions
+- Team member permission management
+- Organization-level team grouping
+- Metadata for team tracking and organization
+
+For more information about the underlying API, refer to the LiteLLM documentation.

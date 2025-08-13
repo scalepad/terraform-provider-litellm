@@ -22,32 +22,38 @@ func ResourceLiteLLMVectorStore() *schema.Resource {
 func resourceLiteLLMVectorStoreCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*litellm.Client)
 
-	vectorStoreData := buildVectorStoreData(d)
-	vectorStore := buildVectorStoreForCreation(vectorStoreData)
+	request := buildVectorStoreGenerateRequest(d)
 
-	createdVectorStore, err := createVectorStore(ctx, c, vectorStore)
+	createdVectorStoreResponse, err := createVectorStore(ctx, c, request)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating vector store: %s", err))
 	}
 
-	d.SetId(createdVectorStore.VectorStoreID)
+	d.SetId(createdVectorStoreResponse.VectorStore.VectorStoreID)
+
+	// Set the resource data with the created vector store information
+	if err := setVectorStoreResourceDataFromGenerate(d, createdVectorStoreResponse); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return resourceLiteLLMVectorStoreRead(ctx, d, m)
 }
 
 func resourceLiteLLMVectorStoreRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*litellm.Client)
 
-	vectorStore, err := getVectorStore(ctx, c, d.Id())
+	vectorStoreInfoResponse, err := getVectorStore(ctx, c, d.Id())
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error reading vector store: %s", err))
 	}
 
-	if vectorStore == nil {
+	if vectorStoreInfoResponse == nil {
 		d.SetId("")
 		return nil
 	}
 
-	if err := setVectorStoreResourceData(d, vectorStore); err != nil {
+	// Update resource data with API response, but preserve state values for certain fields
+	if err := setVectorStoreResourceDataFromInfo(d, vectorStoreInfoResponse); err != nil {
 		return diag.FromErr(err)
 	}
 	return nil
@@ -56,11 +62,9 @@ func resourceLiteLLMVectorStoreRead(ctx context.Context, d *schema.ResourceData,
 func resourceLiteLLMVectorStoreUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*litellm.Client)
 
-	vectorStoreData := buildVectorStoreData(d)
-	vectorStore := buildVectorStoreForCreation(vectorStoreData)
-	vectorStore.VectorStoreID = d.Id() // Set the vector store ID for update
+	request := buildVectorStoreUpdateRequest(d)
 
-	_, err := updateVectorStore(ctx, c, vectorStore)
+	_, err := updateVectorStore(ctx, c, d.Id(), request)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error updating vector store: %s", err))
 	}

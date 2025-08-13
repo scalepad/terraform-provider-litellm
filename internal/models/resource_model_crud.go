@@ -3,10 +3,12 @@ package models
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
-	"net/http"
-	"strings"
 )
 
 func createModel(ctx context.Context, c *litellm.Client, model *Model) (*Model, error) {
@@ -25,7 +27,7 @@ func createModel(ctx context.Context, c *litellm.Client, model *Model) (*Model, 
 }
 
 func getModel(ctx context.Context, c *litellm.Client, modelID string) (*ModelResponse, error) {
-	endpoint := fmt.Sprintf("/model/info?litellm_model_id=%s", modelID)
+	endpoint := fmt.Sprintf("/model/info?litellm_model_id=%s", url.QueryEscape(modelID))
 	resp, err := c.SendRequest(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		// Check if it's a not found error

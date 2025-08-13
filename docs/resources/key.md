@@ -43,6 +43,7 @@ resource "litellm_key" "example" {
   blocked              = false
   tags                 = ["production", "api"]
   send_invite_email    = true
+  key_type             = "llm_api"
 }
 ```
 
@@ -66,7 +67,7 @@ The following arguments are supported:
 
 - `rpm_limit` - (Optional) Requests per minute limit for this key. This sets a rate limit based on the number of API calls.
 
-- `budget_duration` - (Optional) Duration for the budget (e.g., "monthly", "weekly"). This defines the time period for which the `max_budget` applies.
+- `budget_duration` - (Optional) Budget is reset at the end of specified duration. If not set, budget is never reset. You can set duration as seconds ("30s"), minutes ("30m"), hours ("30h"), days ("30d").
 
 - `allowed_cache_controls` - (Optional) List of allowed cache control directives. This can be used to control caching behavior for requests made with this key.
 
@@ -74,7 +75,7 @@ The following arguments are supported:
 
 - `key_alias` - (Optional) Alias for this key. This provides a human-readable identifier for the key.
 
-- `duration` - (Optional) Duration for which this key is valid. This sets an expiration time for the key.
+- `duration` - (Optional) Duration for which this key is valid. You can set duration as seconds ("30s"), minutes ("30m"), hours ("30h"), days ("30d").
 
 - `aliases` - (Optional) Map of model aliases. This allows you to create custom names for models when using this key.
 
@@ -95,6 +96,8 @@ The following arguments are supported:
 - `tags` - (Optional) List of tags associated with this key. This can be used for organization and filtering of keys.
 
 - `send_invite_email` - (Optional) Whether to send an invite email when creating this key. If set to true, an invitation email will be sent to the associated user.
+
+- `key_type` - (Optional) Type of key that determines default allowed routes. Options: "llm_api" (can call LLM API routes), "management" (can call management routes), "read_only" (can only call info/read routes), "default" (uses default allowed routes). Defaults to "default".
 
 ## Attribute Reference
 

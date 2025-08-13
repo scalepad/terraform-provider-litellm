@@ -71,3 +71,72 @@ func SetIfNotZero[T comparable](d *schema.ResourceData, key string, apiValue T) 
 	}
 	// If apiValue is zero for non-bool types, we don't set anything, keeping the existing value
 }
+
+// ShouldUseAPIValue determines if we should use the API value or preserve state
+// This function helps decide whether to update a field based on the API response
+func ShouldUseAPIValue(apiValue interface{}) bool {
+	if apiValue == nil {
+		return false
+	}
+
+	switch v := apiValue.(type) {
+	case string:
+		return v != ""
+	case *string:
+		return v != nil && *v != ""
+	case []string:
+		return len(v) > 0
+	case *[]string:
+		return v != nil && len(*v) > 0
+	case map[string]interface{}:
+		return len(v) > 0
+	case *map[string]interface{}:
+		return v != nil && len(*v) > 0
+	case int:
+		return true // Always use int values from API, including 0
+	case *int:
+		return v != nil
+	case float64:
+		return true // Always use float64 values from API, including 0.0
+	case *float64:
+		return v != nil
+	case bool:
+		return true // Always use bool values from API
+	case *bool:
+		return v != nil
+	default:
+		return apiValue != nil
+	}
+}
+
+// Helper functions for creating pointers
+// These functions return nil for zero values, which is useful for optional API fields
+
+// StringPtr returns a pointer to the string value, or nil if the string is empty
+func StringPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
+
+// IntPtr returns a pointer to the int value, or nil if the int is zero
+func IntPtr(i int) *int {
+	if i == 0 {
+		return nil
+	}
+	return &i
+}
+
+// FloatPtr returns a pointer to the float64 value, or nil if the float is zero
+func FloatPtr(f float64) *float64 {
+	if f == 0 {
+		return nil
+	}
+	return &f
+}
+
+// BoolPtr returns a pointer to the bool value (always returns a pointer, even for false)
+func BoolPtr(b bool) *bool {
+	return &b
+}

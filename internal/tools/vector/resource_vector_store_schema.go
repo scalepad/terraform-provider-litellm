@@ -40,6 +40,7 @@ func resourceVectorStoreSchema() map[string]*schema.Schema {
 		"litellm_params": {
 			Type:        schema.TypeMap,
 			Optional:    true,
+			Computed:    true,
 			Elem:        &schema.Schema{Type: schema.TypeString},
 			Description: "Additional LiteLLM parameters",
 		},

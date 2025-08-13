@@ -2,7 +2,7 @@ HOSTNAME=registry.terraform.io
 NAMESPACE=local
 NAME=litellm
 VERSION=1.0.0
-OS_ARCH=darwin_amd64
+OS_ARCH ?= darwin_arm64
 
 default: install
 

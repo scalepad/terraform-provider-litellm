@@ -49,7 +49,7 @@ The following arguments are supported:
 
 - `base_model` - (Required) The actual model identifier from the provider (e.g., "gpt-4", "claude-2").
 
-- `tier` - (Optional) The usage tier for this model. Valid values are "free" or "paid". Default is "free".
+- `tier` - (Optional) The usage tier for this model. Must be one of: `"free"` or `"paid"`. Default is `"free"`.
 
 - `team_id` - (Optional) Associate the model with a specific team.
 
