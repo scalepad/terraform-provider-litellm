@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 )
@@ -21,7 +22,7 @@ func createKey(ctx context.Context, c *litellm.Client, request *KeyGenerateReque
 
 func getKey(ctx context.Context, c *litellm.Client, keyID string) (*KeyInfoResponse, error) {
 	response, err := litellm.SendRequestTyped[interface{}, KeyInfoResponse](
-		ctx, c, http.MethodGet, fmt.Sprintf("/key/info?key=%s", keyID), nil,
+		ctx, c, http.MethodGet, fmt.Sprintf("/key/info?key=%s", url.QueryEscape(keyID)), nil,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get key: %w", err)
@@ -67,7 +68,7 @@ func deleteKey(ctx context.Context, c *litellm.Client, keyID string) error {
 // listKeys queries the /key/list endpoint to find keys by alias
 func listKeys(ctx context.Context, c *litellm.Client, keyAlias string) (*KeyListResponse, error) {
 	// Build query parameters
-	queryParams := fmt.Sprintf("?page=1&size=10&key_alias=%s&return_full_object=true&include_team_keys=false&sort_order=desc", keyAlias)
+	queryParams := fmt.Sprintf("?page=1&size=10&key_alias=%s&return_full_object=true&include_team_keys=false&sort_order=desc", url.QueryEscape(keyAlias))
 
 	response, err := litellm.SendRequestTyped[interface{}, KeyListResponse](
 		ctx, c, http.MethodGet, "/key/list"+queryParams, nil,
