@@ -10,6 +10,11 @@ on:
 permissions:
   contents: read
 
+# Ensure only one integration test runs at a time and cancel older runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   setup:
     runs-on: ubuntu-latest
