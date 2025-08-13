@@ -1,7 +1,10 @@
 package key
 
 import (
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceKeySchema() map[string]*schema.Schema {
@@ -52,6 +55,11 @@ func resourceKeySchema() map[string]*schema.Schema {
 		"budget_duration": {
 			Type:     schema.TypeString,
 			Optional: true,
+			ValidateFunc: validation.StringMatch(
+				regexp.MustCompile(`^(\d+[smhd])$`),
+				"Budget duration must be in format: number followed by 's' (seconds), 'm' (minutes), 'h' (hours), or 'd' (days). Examples: '30s', '30m', '30h', '30d'",
+			),
+			Description: "Budget is reset at the end of specified duration. If not set, budget is never reset. You can set duration as seconds ('30s'), minutes ('30m'), hours ('30h'), days ('30d').",
 		},
 		"allowed_cache_controls": {
 			Type:     schema.TypeList,
@@ -69,6 +77,11 @@ func resourceKeySchema() map[string]*schema.Schema {
 		"duration": {
 			Type:     schema.TypeString,
 			Optional: true,
+			ValidateFunc: validation.StringMatch(
+				regexp.MustCompile(`^(\d+[smhd])$`),
+				"Duration must be in format: number followed by 's' (seconds), 'm' (minutes), 'h' (hours), or 'd' (days). Examples: '30s', '30m', '30h', '30d'",
+			),
+			Description: "Duration for which this key is valid. You can set duration as seconds ('30s'), minutes ('30m'), hours ('30h'), days ('30d').",
 		},
 		"aliases": {
 			Type:     schema.TypeMap,
@@ -117,6 +130,18 @@ func resourceKeySchema() map[string]*schema.Schema {
 		"send_invite_email": {
 			Type:     schema.TypeBool,
 			Optional: true,
+		},
+		"key_type": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Default:  "default",
+			ValidateFunc: validation.StringInSlice([]string{
+				"llm_api",
+				"management",
+				"read_only",
+				"default",
+			}, false),
+			Description: "Type of key that determines default allowed routes. Options: 'llm_api' (can call LLM API routes), 'management' (can call management routes), 'read_only' (can only call info/read routes), 'default' (uses default allowed routes). Defaults to 'default'.",
 		},
 	}
 }

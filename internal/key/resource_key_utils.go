@@ -27,6 +27,7 @@ func buildKeyData(d *schema.ResourceData) map[string]interface{} {
 	utils.GetValueDefault[string](d, "budget_duration", keyData)
 	utils.GetValueDefault[string](d, "key_alias", keyData)
 	utils.GetValueDefault[string](d, "duration", keyData)
+	utils.GetValueDefault[string](d, "key_type", keyData)
 
 	// Int fields
 	utils.GetValueDefault[int](d, "max_parallel_requests", keyData)
@@ -76,6 +77,7 @@ func setKeyResourceData(d *schema.ResourceData, key *Key) error {
 		"blocked":                key.Blocked,
 		"tags":                   key.Tags,
 		"send_invite_email":      key.SendInviteEmail,
+		"key_type":               key.KeyType,
 	}
 
 	for field, value := range fields {
@@ -140,6 +142,8 @@ func mapToKey(data map[string]interface{}) *Key {
 			key.Tags = v.([]string)
 		case "send_invite_email":
 			key.SendInviteEmail = v.(bool)
+		case "key_type":
+			key.KeyType = v.(string)
 		}
 	}
 	return key

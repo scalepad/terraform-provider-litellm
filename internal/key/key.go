@@ -26,4 +26,5 @@ type Key struct {
 	Blocked              bool                   `json:"blocked"`
 	Tags                 []string               `json:"tags,omitempty"`
 	SendInviteEmail      bool                   `json:"send_invite_email,omitempty"`
+	KeyType              string                 `json:"key_type,omitempty"`
 }
