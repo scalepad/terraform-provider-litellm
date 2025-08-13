@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.6.2] - 2025-08-13
+### :bug: Bug Fixes
+- [`fa57936`](https://github.com/scalepad/terraform-provider-litellm/commit/fa57936a58634711efc7413262ba1bf845ff7440) - add force new for key_type *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+
 ## [v0.6.1] - 2025-08-13
 ### :bug: Bug Fixes
 - [`c1f9e1e`](https://github.com/scalepad/terraform-provider-litellm/commit/c1f9e1eb55bb99c22a102ca09af839680b3fb1e8) - remove deprecated role options from team member resource documentation *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
@@ -244,3 +249,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.5.2]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.5.1...v0.5.2
 [v0.6.0]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.5.2...v0.6.0
 [v0.6.1]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.0...v0.6.1
+[v0.6.2]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.1...v0.6.2
