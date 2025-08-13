@@ -1,68 +1,188 @@
 package team
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/scalepad/terraform-provider-litellm/internal/utils"
 )
 
-func buildTeamData(d *schema.ResourceData, teamID string) map[string]interface{} {
-	teamData := map[string]interface{}{
-		"team_id":    teamID,
-		"team_alias": d.Get("team_alias").(string),
+// buildTeamCreateRequest builds a TeamCreateRequest from Terraform resource data
+func buildTeamCreateRequest(d *schema.ResourceData) *TeamCreateRequest {
+	request := &TeamCreateRequest{}
+
+	// String fields
+	if v, ok := d.GetOk("team_alias"); ok {
+		alias := v.(string)
+		request.TeamAlias = &alias
+	}
+	if v, ok := d.GetOk("organization_id"); ok {
+		orgID := v.(string)
+		request.OrganizationID = &orgID
+	}
+	if v, ok := d.GetOk("budget_duration"); ok {
+		duration := v.(string)
+		request.BudgetDuration = &duration
 	}
 
-	// Add optional fields if they exist
-	for _, key := range []string{"organization_id", "metadata", "tpm_limit", "rpm_limit", "max_budget", "budget_duration", "models", "blocked", "team_member_permissions", "team_member_budget"} {
-		if v, ok := d.GetOk(key); ok {
-			teamData[key] = v
+	// Int fields
+	if v, ok := d.GetOk("tpm_limit"); ok {
+		limit := v.(int)
+		request.TPMLimit = &limit
+	}
+	if v, ok := d.GetOk("rpm_limit"); ok {
+		limit := v.(int)
+		request.RPMLimit = &limit
+	}
+
+	// Float64 fields
+	if v, ok := d.GetOk("max_budget"); ok {
+		budget := v.(float64)
+		request.MaxBudget = &budget
+	}
+	if v, ok := d.GetOk("team_member_budget"); ok {
+		budget := v.(float64)
+		request.TeamMemberBudget = &budget
+	}
+
+	// Bool fields
+	if v, ok := d.GetOk("blocked"); ok {
+		request.Blocked = v.(bool)
+	}
+
+	// Map fields
+	if v, ok := d.GetOk("metadata"); ok {
+		request.Metadata = v.(map[string]interface{})
+	}
+
+	// String list fields
+	if v, ok := d.GetOk("models"); ok {
+		models := make([]string, 0)
+		for _, model := range v.([]interface{}) {
+			if s, ok := model.(string); ok {
+				models = append(models, s)
+			}
+		}
+		request.Models = models
+	}
+
+	if v, ok := d.GetOk("team_member_permissions"); ok {
+		permissions := make([]string, 0)
+		for _, perm := range v.([]interface{}) {
+			if s, ok := perm.(string); ok {
+				permissions = append(permissions, s)
+			}
+		}
+		request.TeamMemberPermissions = permissions
+	}
+
+	return request
+}
+
+// buildTeamUpdateRequest builds a TeamUpdateRequest from Terraform resource data
+// Only includes fields that have changed
+func buildTeamUpdateRequest(d *schema.ResourceData, teamID string) *TeamUpdateRequest {
+	request := &TeamUpdateRequest{
+		TeamID: teamID,
+	}
+
+	// String fields - only set if changed
+	if d.HasChange("team_alias") {
+		if v, ok := d.GetOk("team_alias"); ok {
+			alias := v.(string)
+			request.TeamAlias = &alias
+		}
+	}
+	if d.HasChange("organization_id") {
+		if v, ok := d.GetOk("organization_id"); ok {
+			orgID := v.(string)
+			request.OrganizationID = &orgID
+		}
+	}
+	if d.HasChange("budget_duration") {
+		if v, ok := d.GetOk("budget_duration"); ok {
+			duration := v.(string)
+			request.BudgetDuration = &duration
 		}
 	}
 
-	return teamData
+	// Int fields - only set if changed
+	if d.HasChange("tpm_limit") {
+		if v, ok := d.GetOk("tpm_limit"); ok {
+			limit := v.(int)
+			request.TPMLimit = &limit
+		}
+	}
+	if d.HasChange("rpm_limit") {
+		if v, ok := d.GetOk("rpm_limit"); ok {
+			limit := v.(int)
+			request.RPMLimit = &limit
+		}
+	}
+
+	// Float64 fields - only set if changed
+	if d.HasChange("max_budget") {
+		if v, ok := d.GetOk("max_budget"); ok {
+			budget := v.(float64)
+			request.MaxBudget = &budget
+		}
+	}
+	if d.HasChange("team_member_budget") {
+		if v, ok := d.GetOk("team_member_budget"); ok {
+			budget := v.(float64)
+			request.TeamMemberBudget = &budget
+		}
+	}
+
+	// Bool fields - only set if changed
+	if d.HasChange("blocked") {
+		request.Blocked = d.Get("blocked").(bool)
+	}
+
+	// Map fields - only set if changed
+	if d.HasChange("metadata") {
+		if v, ok := d.GetOk("metadata"); ok {
+			request.Metadata = v.(map[string]interface{})
+		}
+	}
+
+	// String list fields - only set if changed
+	if d.HasChange("models") {
+		if v, ok := d.GetOk("models"); ok {
+			models := make([]string, 0)
+			for _, model := range v.([]interface{}) {
+				if s, ok := model.(string); ok {
+					models = append(models, s)
+				}
+			}
+			request.Models = models
+		}
+	}
+
+	return request
 }
 
-func buildTeamDataForUtils(d *schema.ResourceData) map[string]interface{} {
-	teamData := make(map[string]interface{})
+// setTeamResourceData sets Terraform resource data from TeamInfoResponse
+func setTeamResourceData(d *schema.ResourceData, teamResp *TeamInfoResponse) error {
+	teamInfo := teamResp.TeamInfo
 
-	// String fields
-	utils.GetValueDefault[string](d, "team_alias", teamData)
-	utils.GetValueDefault[string](d, "organization_id", teamData)
-	utils.GetValueDefault[string](d, "budget_duration", teamData)
-
-	// Int fields
-	utils.GetValueDefault[int](d, "tpm_limit", teamData)
-	utils.GetValueDefault[int](d, "rpm_limit", teamData)
-
-	// Float64 fields
-	utils.GetValueDefault[float64](d, "max_budget", teamData)
-	utils.GetValueDefault[float64](d, "team_member_budget", teamData)
-
-	// Bool fields
-	utils.GetValueDefault[bool](d, "blocked", teamData)
-
-	// Map fields
-	utils.GetValueDefault[map[string]interface{}](d, "metadata", teamData)
-
-	// String list fields
-	utils.GetStringListValue(d, "models", teamData)
-	utils.GetStringListValue(d, "team_member_permissions", teamData)
-
-	return teamData
-}
-
-func setTeamResourceData(d *schema.ResourceData, team *TeamResponse) error {
 	fields := map[string]interface{}{
-		"team_alias":              team.TeamAlias,
-		"organization_id":         team.OrganizationID,
-		"tpm_limit":               team.TPMLimit,
-		"rpm_limit":               team.RPMLimit,
-		"max_budget":              team.MaxBudget,
-		"budget_duration":         team.BudgetDuration,
-		"team_member_budget":      team.TeamMemberBudget,
-		"blocked":                 team.Blocked,
-		"team_member_permissions": team.TeamMemberPermissions,
+		"team_alias":              teamInfo.TeamAlias,
+		"organization_id":         teamInfo.OrganizationID,
+		"blocked":                 teamInfo.Blocked,
+		"team_member_permissions": teamInfo.TeamMemberPermissions,
+	}
+
+	// Handle pointer fields
+	if teamInfo.TPMLimit != nil {
+		fields["tpm_limit"] = *teamInfo.TPMLimit
+	}
+	if teamInfo.RPMLimit != nil {
+		fields["rpm_limit"] = *teamInfo.RPMLimit
+	}
+	if teamInfo.MaxBudget != nil {
+		fields["max_budget"] = *teamInfo.MaxBudget
+	}
+	if teamInfo.BudgetDuration != nil {
+		fields["budget_duration"] = *teamInfo.BudgetDuration
 	}
 
 	for field, value := range fields {
@@ -71,123 +191,16 @@ func setTeamResourceData(d *schema.ResourceData, team *TeamResponse) error {
 	}
 
 	// Handle metadata separately as it's a map
-	if team.Metadata != nil {
-		d.Set("metadata", team.Metadata)
+	if teamInfo.Metadata != nil {
+		d.Set("metadata", teamInfo.Metadata)
 	}
 
 	// Handle models separately as it's a list
-	if team.Models != nil {
-		d.Set("models", team.Models)
+	if teamInfo.Models != nil {
+		d.Set("models", teamInfo.Models)
 	} else {
 		d.Set("models", d.Get("models"))
 	}
 
 	return nil
-}
-
-func parseTeamAPIResponse(resp map[string]interface{}) (*TeamResponse, error) {
-	if resp == nil {
-		return nil, fmt.Errorf("received nil response")
-	}
-
-	teamResp := &TeamResponse{}
-
-	// Parse basic fields
-	if v, ok := resp["team_id"].(string); ok {
-		teamResp.TeamID = v
-	}
-	if v, ok := resp["team_alias"].(string); ok {
-		teamResp.TeamAlias = v
-	}
-	if v, ok := resp["organization_id"].(string); ok {
-		teamResp.OrganizationID = v
-	}
-	if v, ok := resp["budget_duration"].(string); ok {
-		teamResp.BudgetDuration = v
-	}
-
-	// Parse numeric fields
-	if v, ok := resp["tpm_limit"].(float64); ok {
-		teamResp.TPMLimit = int(v)
-	}
-	if v, ok := resp["rpm_limit"].(float64); ok {
-		teamResp.RPMLimit = int(v)
-	}
-	if v, ok := resp["max_budget"].(float64); ok {
-		teamResp.MaxBudget = v
-	}
-	if v, ok := resp["team_member_budget"].(float64); ok {
-		teamResp.TeamMemberBudget = v
-	}
-
-	// Parse boolean fields
-	if v, ok := resp["blocked"].(bool); ok {
-		teamResp.Blocked = v
-	}
-
-	// Parse map fields
-	if v, ok := resp["metadata"].(map[string]interface{}); ok {
-		teamResp.Metadata = v
-	}
-
-	// Parse array fields
-	if models, ok := resp["models"].([]interface{}); ok {
-		teamResp.Models = make([]string, len(models))
-		for i, model := range models {
-			if s, ok := model.(string); ok {
-				teamResp.Models[i] = s
-			}
-		}
-	}
-
-	if permissions, ok := resp["team_member_permissions"].([]interface{}); ok {
-		teamResp.TeamMemberPermissions = make([]string, len(permissions))
-		for i, perm := range permissions {
-			if s, ok := perm.(string); ok {
-				teamResp.TeamMemberPermissions[i] = s
-			}
-		}
-	}
-
-	return teamResp, nil
-}
-
-func buildTeamForCreation(data map[string]interface{}) *Team {
-	team := &Team{}
-
-	if v, ok := data["team_alias"].(string); ok {
-		team.TeamAlias = v
-	}
-	if v, ok := data["organization_id"].(string); ok {
-		team.OrganizationID = v
-	}
-	if v, ok := data["budget_duration"].(string); ok {
-		team.BudgetDuration = v
-	}
-	if v, ok := data["tpm_limit"].(int); ok {
-		team.TPMLimit = v
-	}
-	if v, ok := data["rpm_limit"].(int); ok {
-		team.RPMLimit = v
-	}
-	if v, ok := data["max_budget"].(float64); ok {
-		team.MaxBudget = v
-	}
-	if v, ok := data["team_member_budget"].(float64); ok {
-		team.TeamMemberBudget = v
-	}
-	if v, ok := data["blocked"].(bool); ok {
-		team.Blocked = v
-	}
-	if v, ok := data["metadata"].(map[string]interface{}); ok {
-		team.Metadata = v
-	}
-	if v, ok := data["models"].([]string); ok {
-		team.Models = v
-	}
-	if v, ok := data["team_member_permissions"].([]string); ok {
-		team.TeamMemberPermissions = v
-	}
-
-	return team
 }
