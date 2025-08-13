@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
@@ -24,7 +25,7 @@ func createTeam(ctx context.Context, c *litellm.Client, request *TeamCreateReque
 // getTeam retrieves team information by team ID
 func getTeam(ctx context.Context, c *litellm.Client, teamID string) (*TeamInfoResponse, error) {
 	response, err := litellm.SendRequestTyped[interface{}, TeamInfoResponse](
-		ctx, c, http.MethodGet, fmt.Sprintf("/team/info?team_id=%s", teamID), nil,
+		ctx, c, http.MethodGet, fmt.Sprintf("/team/info?team_id=%s", url.QueryEscape(teamID)), nil,
 	)
 	if err != nil {
 		// Check if it's a not found error
@@ -72,7 +73,7 @@ func deleteTeam(ctx context.Context, c *litellm.Client, teamID string) error {
 // getTeamPermissions retrieves team permissions by team ID
 func getTeamPermissions(ctx context.Context, c *litellm.Client, teamID string) (*TeamPermissionsResponse, error) {
 	response, err := litellm.SendRequestTyped[interface{}, TeamPermissionsResponse](
-		ctx, c, http.MethodGet, fmt.Sprintf("/team/permissions_list?team_id=%s", teamID), nil,
+		ctx, c, http.MethodGet, fmt.Sprintf("/team/permissions_list?team_id=%s", url.QueryEscape(teamID)), nil,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get team permissions: %w", err)
