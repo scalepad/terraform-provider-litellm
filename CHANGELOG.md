@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.6.0] - 2025-08-13
+### :sparkles: New Features
+- [`fb6e2eb`](https://github.com/scalepad/terraform-provider-litellm/commit/fb6e2eb9ce520fb790877dc6fa50fba0853de3c6) - add connection check *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`26627f2`](https://github.com/scalepad/terraform-provider-litellm/commit/26627f25d9cf387057758264a1badfe60871eb9a) - **user**: add user management to litellm *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`30189ba`](https://github.com/scalepad/terraform-provider-litellm/commit/30189babf511415e4c91c775d3cf007795827c3c) - **users**: make user module able to create and update existing users. *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+### :bug: Bug Fixes
+- [`deebbec`](https://github.com/scalepad/terraform-provider-litellm/commit/deebbec8f55a5a83d7053744215ca4c8a4445e3f) - **key**: fix issue with setting send_email for key *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`69508e9`](https://github.com/scalepad/terraform-provider-litellm/commit/69508e9d8d64bb80f1ca4870ed514ee64a421bdf) - **credentials**: fix the datasource credentials to not use deprecated methods *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`401fe4b`](https://github.com/scalepad/terraform-provider-litellm/commit/401fe4b2ce1987f78e34a2ace5559e85c2f73886) - **credentials**: fix operation on resource credential *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`363ca7b`](https://github.com/scalepad/terraform-provider-litellm/commit/363ca7b4cd3907d2a3ee32fac6e93e232067a4e0) - **models**: refactor the code to split the logic into proper files *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`1cfd062`](https://github.com/scalepad/terraform-provider-litellm/commit/1cfd062ce586b93fb89f86eeacfa036aac7ee010) - **team**: refactor how team are created and handled *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`b0f5043`](https://github.com/scalepad/terraform-provider-litellm/commit/b0f5043adc586429296bfc50e39cac8da9b871a8) - **team_member**: Refactor fully the team member to be consistent *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`b6c1771`](https://github.com/scalepad/terraform-provider-litellm/commit/b6c1771540878e30b1705727c1ab175b19cdf355) - **credentials**: fix issue with creds *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`164db5f`](https://github.com/scalepad/terraform-provider-litellm/commit/164db5fef35626cf3a6cdf040e24143efca816be) - **mcp**: refactor mcp and add tests *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`9425c0c`](https://github.com/scalepad/terraform-provider-litellm/commit/9425c0ccf9fae1396b7dfbbeda3b1ff31c83f54d) - **vector**: refactor vector *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`c51de99`](https://github.com/scalepad/terraform-provider-litellm/commit/c51de9940fa40371cac27d0dfd02745743d7bdc8) - **user**: fix user type and deleting users *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`5a5ce96`](https://github.com/scalepad/terraform-provider-litellm/commit/5a5ce961689183f4df3fcaf2e905d42ca71379aa) - **user**: issue with new fields not being propagated to state *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`fcb1f70`](https://github.com/scalepad/terraform-provider-litellm/commit/fcb1f700a795a613d7464490dcbaa8b3f4870b12) - **models**: be sure to have validation for tier of model *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`be36535`](https://github.com/scalepad/terraform-provider-litellm/commit/be365356bb4397844283bef197d63906d2b81335) - **key**: add proper duration validation *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`5136d3e`](https://github.com/scalepad/terraform-provider-litellm/commit/5136d3ef83f43b9473a043197924ef85422eb290) - **key**: fix the key module *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`ad507ab`](https://github.com/scalepad/terraform-provider-litellm/commit/ad507ab047a1c6fc251968218a810983ceb7b9ba) - **key**: keys are now only updating fields that have changed. *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`0260291`](https://github.com/scalepad/terraform-provider-litellm/commit/0260291016a8165f1438a6b0101ffe61aa2c80b0) - **key**: For security reason, migrate from using the key as ID to use the token_id *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`4381ff7`](https://github.com/scalepad/terraform-provider-litellm/commit/4381ff759575fe27067be9693eea778e555631c7) - **team**: only send the field that changed *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`e50c77e`](https://github.com/scalepad/terraform-provider-litellm/commit/e50c77ebccf7af59c5656dcfd2b3a5af05d2bc95) - **vector**: have proper way to set them *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`9e9351f`](https://github.com/scalepad/terraform-provider-litellm/commit/9e9351fcbf9b6e684e16d8efa6f9455acd46059c) - **user**: be sure to url-encode the ids *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`8134087`](https://github.com/scalepad/terraform-provider-litellm/commit/813408719397bd6c34aa5f5faf010bee3f3bf985) - add URL escaping for model ID parameter in resource_model_crud.go *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`932ea48`](https://github.com/scalepad/terraform-provider-litellm/commit/932ea489237d665878f896006abb018c7558547c) - add URL escaping for key ID and key alias parameters in key_crud.go *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`c8dd17c`](https://github.com/scalepad/terraform-provider-litellm/commit/c8dd17ccbec6b0454a8665ba3077750f6d33c82b) - add URL escaping for team ID parameters in team_crud.go *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`fa7d88c`](https://github.com/scalepad/terraform-provider-litellm/commit/fa7d88c8870c7efca548cba4b39a7fcb91174599) - update resourceKeyCreate to set ID using TokenID instead of Key *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+
 ## [v0.5.2] - 2025-08-11
 ### :bug: Bug Fixes
 - [`c10484b`](https://github.com/scalepad/terraform-provider-litellm/commit/c10484b3f5060a08852481350d0923a90beeaa4b) - don't report on null field *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
@@ -205,3 +237,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.5.0]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.4.1...v0.5.0
 [v0.5.1]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.5.0...v0.5.1
 [v0.5.2]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.5.1...v0.5.2
+[v0.6.0]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.5.2...v0.6.0
