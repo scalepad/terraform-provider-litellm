@@ -88,6 +88,10 @@ func resourceModelSchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 			Default:  "free",
+			ValidateFunc: validation.StringInSlice([]string{
+				"free",
+				"paid",
+			}, false),
 		},
 		"team_id": {
 			Type:     schema.TypeString,
