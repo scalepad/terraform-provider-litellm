@@ -1,6 +1,6 @@
 # litellm_user Resource
 
-Manages a LiteLLM user with comprehensive configuration options including budget controls, rate limiting, model access, permissions, and advanced features.
+Manages a LiteLLM user with comprehensive configuration options including budget controls, rate limiting, model access, and advanced features.
 
 ## Example Usage
 
@@ -51,17 +51,6 @@ resource "litellm_user" "advanced" {
     "gpt-4" = "100"
     "claude-3.5-sonnet" = "150"
   }
-
-  # Security and permissions
-  permissions = {
-    "admin_ui_access" = "true"
-    "model_management" = "true"
-  }
-  object_permission = {
-    "team_123" = "read"
-    "project_456" = "write"
-  }
-  guardrails = ["content_filter", "pii_detection"]
 
   # User management
   send_invite_email = true
@@ -125,7 +114,7 @@ The following arguments are supported:
 
 ### Model Access and Configuration
 
-- `models` - (Optional) List of models the user has access to. Set to `['no-default-models']` to block all model access.
+- `models` - (Optional) List of models the user has access to. Defaults to `['no-default-models']` which blocks all model access. Provide specific model names (e.g., `['gpt-4', 'gpt-3.5-turbo']`) to grant access to those models.
 
 - `aliases` - (Optional) Model aliases for the user. Map of alias names to actual model names.
 
@@ -137,19 +126,13 @@ The following arguments are supported:
 
 ### Security and Permissions
 
-- `permissions` - (Optional) User-specific permissions. Map of permission names to values.
-
-- `object_permission` - (Optional) Object-specific permissions for the user. Map of object IDs to permission levels.
-
-- `guardrails` - (Optional) List of active guardrails for the user (e.g., content filters, PII detection).
-
 - `blocked` - (Optional) Whether the user is blocked. Defaults to `false`.
 
 ### User Management
 
-- `send_invite_email` - (Optional) Whether to send an invite email to the user. Defaults to `false`.
+- `send_invite_email` - (Optional) Whether to send an invite email to the user. Defaults to `false`. **Note: Changing this value will force recreation of the user.**
 
-- `auto_create_key` - (Optional) Whether to automatically create a key for the user. Defaults to `true`.
+- `auto_create_key` - (Optional) Whether to automatically create a key for the user. Defaults to `false`. **Note: Changing this value will force recreation of the user.**
 
 - `key_alias` - (Optional) Alias for the auto-created key.
 
@@ -233,6 +216,7 @@ Note that the delete operation uses a POST request with the user ID in the reque
 
 - When `user_id` is not provided, the system automatically generates a UUIDv7 identifier
 - The `auto_create_key` feature automatically creates an API key for the user when enabled
+- Both `send_invite_email` and `auto_create_key` are creation-time settings that will force recreation of the user if changed
 - Model-specific limits override global limits for those specific models
 - Soft budgets trigger alerts but don't block requests, while hard budgets (`max_budget`) do block requests
 - The `config` field is deprecated in favor of more specific configuration fields
