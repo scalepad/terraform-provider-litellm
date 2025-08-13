@@ -50,7 +50,7 @@ func resourceUserSchema() map[string]*schema.Schema {
 			Type:        schema.TypeList,
 			Optional:    true,
 			Elem:        &schema.Schema{Type: schema.TypeString},
-			Description: "List of models the user has access to. Set to ['no-default-models'] to block all model access.",
+			Description: "List of models the user has access to. If not specified, defaults to ['no-default-models'] which blocks all model access. Provide specific model names to grant access.",
 		},
 		"tpm_limit": {
 			Type:        schema.TypeInt,
@@ -72,12 +72,14 @@ func resourceUserSchema() map[string]*schema.Schema {
 			Type:        schema.TypeBool,
 			Optional:    true,
 			Default:     false,
+			ForceNew:    true,
 			Description: "Whether to send an invite email to the user",
 		},
 		"auto_create_key": {
 			Type:        schema.TypeBool,
 			Optional:    true,
-			Default:     true,
+			Default:     false,
+			ForceNew:    true,
 			Description: "Whether to automatically create a key for the user",
 		},
 		"aliases": {
@@ -103,18 +105,6 @@ func resourceUserSchema() map[string]*schema.Schema {
 			Optional:    true,
 			Default:     false,
 			Description: "Whether the user is blocked",
-		},
-		"guardrails": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			Description: "List of active guardrails for the user",
-		},
-		"permissions": {
-			Type:        schema.TypeMap,
-			Optional:    true,
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			Description: "User-specific permissions",
 		},
 		"max_parallel_requests": {
 			Type:        schema.TypeInt,
@@ -158,12 +148,6 @@ func resourceUserSchema() map[string]*schema.Schema {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Description: "SSO user identifier",
-		},
-		"object_permission": {
-			Type:        schema.TypeMap,
-			Optional:    true,
-			Elem:        &schema.Schema{Type: schema.TypeString},
-			Description: "Object-specific permissions for the user",
 		},
 		"prompts": {
 			Type:        schema.TypeList,

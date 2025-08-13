@@ -113,12 +113,9 @@ func buildUserCreateRequest(d *schema.ResourceData) *UserCreateRequest {
 		Aliases:              make(map[string]interface{}),
 		Config:               make(map[string]interface{}),
 		AllowedCacheControls: make([]string, 0),
-		Guardrails:           make([]string, 0),
-		Permissions:          make(map[string]interface{}),
 		ModelMaxBudget:       make(map[string]interface{}),
 		ModelRPMLimit:        make(map[string]interface{}),
 		ModelTPMLimit:        make(map[string]interface{}),
-		ObjectPermission:     make(map[string]interface{}),
 		Prompts:              make([]string, 0),
 		Organizations:        make([]string, 0),
 	}
@@ -176,6 +173,8 @@ func buildUserCreateRequest(d *schema.ResourceData) *UserCreateRequest {
 			models[i] = model.(string)
 		}
 		req.Models = models
+	} else {
+		req.Models = []string{"no-default-models"}
 	}
 
 	if v, ok := d.GetOk("allowed_cache_controls"); ok {
@@ -185,15 +184,6 @@ func buildUserCreateRequest(d *schema.ResourceData) *UserCreateRequest {
 			controls[i] = control.(string)
 		}
 		req.AllowedCacheControls = controls
-	}
-
-	if v, ok := d.GetOk("guardrails"); ok {
-		guardrailsList := v.([]interface{})
-		guardrails := make([]string, len(guardrailsList))
-		for i, guardrail := range guardrailsList {
-			guardrails[i] = guardrail.(string)
-		}
-		req.Guardrails = guardrails
 	}
 
 	if v, ok := d.GetOk("prompts"); ok {
@@ -224,9 +214,6 @@ func buildUserCreateRequest(d *schema.ResourceData) *UserCreateRequest {
 	if v, ok := d.GetOk("config"); ok {
 		req.Config = v.(map[string]interface{})
 	}
-	if v, ok := d.GetOk("permissions"); ok {
-		req.Permissions = v.(map[string]interface{})
-	}
 	if v, ok := d.GetOk("model_max_budget"); ok {
 		req.ModelMaxBudget = v.(map[string]interface{})
 	}
@@ -235,9 +222,6 @@ func buildUserCreateRequest(d *schema.ResourceData) *UserCreateRequest {
 	}
 	if v, ok := d.GetOk("model_tpm_limit"); ok {
 		req.ModelTPMLimit = v.(map[string]interface{})
-	}
-	if v, ok := d.GetOk("object_permission"); ok {
-		req.ObjectPermission = v.(map[string]interface{})
 	}
 
 	return req
@@ -305,15 +289,6 @@ func buildUserUpdateRequest(d *schema.ResourceData, userID string) *UserUpdateRe
 		req.AllowedCacheControls = controls
 	}
 
-	if v, ok := d.GetOk("guardrails"); ok {
-		guardrailsList := v.([]interface{})
-		guardrails := make([]string, len(guardrailsList))
-		for i, guardrail := range guardrailsList {
-			guardrails[i] = guardrail.(string)
-		}
-		req.Guardrails = guardrails
-	}
-
 	if v, ok := d.GetOk("prompts"); ok {
 		promptsList := v.([]interface{})
 		prompts := make([]string, len(promptsList))
@@ -342,9 +317,6 @@ func buildUserUpdateRequest(d *schema.ResourceData, userID string) *UserUpdateRe
 	if v, ok := d.GetOk("config"); ok {
 		req.Config = v.(map[string]interface{})
 	}
-	if v, ok := d.GetOk("permissions"); ok {
-		req.Permissions = v.(map[string]interface{})
-	}
 	if v, ok := d.GetOk("model_max_budget"); ok {
 		req.ModelMaxBudget = v.(map[string]interface{})
 	}
@@ -353,9 +325,6 @@ func buildUserUpdateRequest(d *schema.ResourceData, userID string) *UserUpdateRe
 	}
 	if v, ok := d.GetOk("model_tpm_limit"); ok {
 		req.ModelTPMLimit = v.(map[string]interface{})
-	}
-	if v, ok := d.GetOk("object_permission"); ok {
-		req.ObjectPermission = v.(map[string]interface{})
 	}
 
 	return req
@@ -385,8 +354,6 @@ func setUserResourceData(d *schema.ResourceData, user *User) error {
 	utils.SetIfNotZero(d, "max_parallel_requests", user.MaxParallelRequests)
 
 	// Handle boolean fields - always set them (including false values)
-	utils.SetIfNotZero(d, "send_invite_email", user.SendInviteEmail)
-	utils.SetIfNotZero(d, "auto_create_key", user.AutoCreateKey)
 	utils.SetIfNotZero(d, "blocked", user.Blocked)
 
 	// Handle string slices - only set if not empty
@@ -398,12 +365,6 @@ func setUserResourceData(d *schema.ResourceData, user *User) error {
 
 	if len(user.AllowedCacheControls) > 0 {
 		if err := d.Set("allowed_cache_controls", user.AllowedCacheControls); err != nil {
-			return err
-		}
-	}
-
-	if len(user.Guardrails) > 0 {
-		if err := d.Set("guardrails", user.Guardrails); err != nil {
 			return err
 		}
 	}
@@ -439,12 +400,6 @@ func setUserResourceData(d *schema.ResourceData, user *User) error {
 		}
 	}
 
-	if len(user.Permissions) > 0 {
-		if err := d.Set("permissions", user.Permissions); err != nil {
-			return err
-		}
-	}
-
 	if len(user.ModelMaxBudget) > 0 {
 		if err := d.Set("model_max_budget", user.ModelMaxBudget); err != nil {
 			return err
@@ -459,12 +414,6 @@ func setUserResourceData(d *schema.ResourceData, user *User) error {
 
 	if len(user.ModelTPMLimit) > 0 {
 		if err := d.Set("model_tpm_limit", user.ModelTPMLimit); err != nil {
-			return err
-		}
-	}
-
-	if len(user.ObjectPermission) > 0 {
-		if err := d.Set("object_permission", user.ObjectPermission); err != nil {
 			return err
 		}
 	}

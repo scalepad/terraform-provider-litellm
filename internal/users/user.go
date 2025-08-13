@@ -40,14 +40,12 @@ type User struct {
 	Metadata             map[string]interface{} `json:"metadata,omitempty"`
 	Spend                float64                `json:"spend,omitempty"`
 	KeyCount             int                    `json:"key_count,omitempty"`
-	SendInviteEmail      bool                   `json:"send_invite_email,omitempty"`
-	AutoCreateKey        bool                   `json:"auto_create_key,omitempty"`
+	SendInviteEmail      bool                   `json:"send_invite_email"`
+	AutoCreateKey        bool                   `json:"auto_create_key"`
 	Aliases              map[string]interface{} `json:"aliases,omitempty"`
 	Config               map[string]interface{} `json:"config,omitempty"`
 	AllowedCacheControls []string               `json:"allowed_cache_controls,omitempty"`
-	Blocked              bool                   `json:"blocked,omitempty"`
-	Guardrails           []string               `json:"guardrails,omitempty"`
-	Permissions          map[string]interface{} `json:"permissions,omitempty"`
+	Blocked              bool                   `json:"blocked"`
 	MaxParallelRequests  int                    `json:"max_parallel_requests,omitempty"`
 	SoftBudget           float64                `json:"soft_budget,omitempty"`
 	ModelMaxBudget       map[string]interface{} `json:"model_max_budget,omitempty"`
@@ -56,7 +54,6 @@ type User struct {
 	Duration             string                 `json:"duration,omitempty"`
 	KeyAlias             string                 `json:"key_alias,omitempty"`
 	SSOUserID            string                 `json:"sso_user_id,omitempty"`
-	ObjectPermission     map[string]interface{} `json:"object_permission,omitempty"`
 	Prompts              []string               `json:"prompts,omitempty"`
 	Organizations        []string               `json:"organizations,omitempty"`
 	CreatedAt            string                 `json:"created_at,omitempty"`
@@ -76,14 +73,12 @@ type UserCreateRequest struct {
 	TPMLimit             int                    `json:"tpm_limit,omitempty"`
 	RPMLimit             int                    `json:"rpm_limit,omitempty"`
 	Metadata             map[string]interface{} `json:"metadata,omitempty"`
-	SendInviteEmail      bool                   `json:"send_invite_email,omitempty"`
-	AutoCreateKey        bool                   `json:"auto_create_key,omitempty"`
+	SendInviteEmail      bool                   `json:"send_invite_email"`
+	AutoCreateKey        bool                   `json:"auto_create_key"`
 	Aliases              map[string]interface{} `json:"aliases,omitempty"`
 	Config               map[string]interface{} `json:"config,omitempty"`
 	AllowedCacheControls []string               `json:"allowed_cache_controls,omitempty"`
-	Blocked              bool                   `json:"blocked,omitempty"`
-	Guardrails           []string               `json:"guardrails,omitempty"`
-	Permissions          map[string]interface{} `json:"permissions,omitempty"`
+	Blocked              bool                   `json:"blocked"`
 	MaxParallelRequests  int                    `json:"max_parallel_requests,omitempty"`
 	SoftBudget           float64                `json:"soft_budget,omitempty"`
 	ModelMaxBudget       map[string]interface{} `json:"model_max_budget,omitempty"`
@@ -92,7 +87,6 @@ type UserCreateRequest struct {
 	Duration             string                 `json:"duration,omitempty"`
 	KeyAlias             string                 `json:"key_alias,omitempty"`
 	SSOUserID            string                 `json:"sso_user_id,omitempty"`
-	ObjectPermission     map[string]interface{} `json:"object_permission,omitempty"`
 	Prompts              []string               `json:"prompts,omitempty"`
 	Organizations        []string               `json:"organizations,omitempty"`
 }
@@ -112,16 +106,13 @@ type UserUpdateRequest struct {
 	Aliases              map[string]interface{} `json:"aliases,omitempty"`
 	Config               map[string]interface{} `json:"config,omitempty"`
 	AllowedCacheControls []string               `json:"allowed_cache_controls,omitempty"`
-	Blocked              bool                   `json:"blocked,omitempty"`
-	Guardrails           []string               `json:"guardrails,omitempty"`
-	Permissions          map[string]interface{} `json:"permissions,omitempty"`
+	Blocked              bool                   `json:"blocked"`
 	MaxParallelRequests  int                    `json:"max_parallel_requests,omitempty"`
 	SoftBudget           float64                `json:"soft_budget,omitempty"`
 	ModelMaxBudget       map[string]interface{} `json:"model_max_budget,omitempty"`
 	ModelRPMLimit        map[string]interface{} `json:"model_rpm_limit,omitempty"`
 	ModelTPMLimit        map[string]interface{} `json:"model_tpm_limit,omitempty"`
 	SSOUserID            string                 `json:"sso_user_id,omitempty"`
-	ObjectPermission     map[string]interface{} `json:"object_permission,omitempty"`
 	Prompts              []string               `json:"prompts,omitempty"`
 	Organizations        []string               `json:"organizations,omitempty"`
 }
