@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.6.5] - 2025-08-14
+### :bug: Bug Fixes
+- [`bc37c0c`](https://github.com/scalepad/terraform-provider-litellm/commit/bc37c0c431b2d2d61ca352470e2a38e2e709872a) - **team**: fix issue when setting metadata where we override the team_member_budget_id *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+
 ## [v0.6.4] - 2025-08-14
 ### :bug: Bug Fixes
 - [`6d39440`](https://github.com/scalepad/terraform-provider-litellm/commit/6d39440190e7faa67f80514b557ae5a9206aa86c) - **member**: fix issue with member data not updated properly in state *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
@@ -267,3 +272,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.6.2]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.1...v0.6.2
 [v0.6.3]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.2...v0.6.3
 [v0.6.4]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.3...v0.6.4
+[v0.6.5]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.4...v0.6.5
