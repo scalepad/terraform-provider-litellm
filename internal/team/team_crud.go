@@ -22,8 +22,8 @@ func createTeam(ctx context.Context, c *litellm.Client, request *TeamCreateReque
 	return response, nil
 }
 
-// getTeam retrieves team information by team ID
-func getTeam(ctx context.Context, c *litellm.Client, teamID string) (*TeamInfoResponse, error) {
+// GetTeam retrieves team information by team ID
+func GetTeam(ctx context.Context, c *litellm.Client, teamID string) (*TeamInfoResponse, error) {
 	response, err := litellm.SendRequestTyped[interface{}, TeamInfoResponse](
 		ctx, c, http.MethodGet, fmt.Sprintf("/team/info?team_id=%s", url.QueryEscape(teamID)), nil,
 	)

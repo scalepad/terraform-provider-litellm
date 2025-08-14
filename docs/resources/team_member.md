@@ -2,7 +2,32 @@
 
 Manages individual team member configurations in LiteLLM. This resource allows you to add, update, and remove team members with specific permissions and budget limits.
 
+## Best Practice
+
+It's recommended to create users first using the [`litellm_user`](./user.md) resource before adding them to teams. This ensures proper user management and allows for better control over user properties.
+
 ## Example Usage
+
+### Using with existing user
+
+```hcl
+# Create user first (recommended)
+resource "litellm_user" "engineer" {
+  user_id    = "user_3"
+  user_email = "engineer@example.com"
+  user_alias = "Engineer User"
+}
+
+# Then add to team
+resource "litellm_team_member" "engineer" {
+  team_id            = litellm_team.engineering.id
+  user_id            = litellm_user.engineer.user_id
+  role               = "user"
+  max_budget_in_team = 200.0
+}
+```
+
+### Using with user_email (alternative)
 
 ```hcl
 resource "litellm_team_member" "engineer" {
@@ -22,7 +47,7 @@ The following arguments are supported:
 
 - `user_id` - (Required) Unique identifier for the user.
 
-- `user_email` - (Required) Email address of the user.
+- `user_email` - (Optional) Email address of the user. **Note**: It's recommended to create users first using the [`litellm_user`](./user.md) resource instead of providing the email here.
 
 - `role` - (Required) The role of the team member. Valid values are:
 

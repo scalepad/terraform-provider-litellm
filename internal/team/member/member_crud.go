@@ -5,64 +5,145 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
+	"github.com/scalepad/terraform-provider-litellm/internal/team"
 )
 
-// createTeamMember creates a new team member
-func createTeamMember(ctx context.Context, c *litellm.Client, member *TeamMember) (*TeamMemberResponse, error) {
-	memberData := map[string]interface{}{
-		"member": []map[string]interface{}{
-			{
-				"role":       member.Role,
-				"user_id":    member.UserID,
-				"user_email": member.UserEmail,
-			},
-		},
-		"team_id":            member.TeamID,
-		"max_budget_in_team": member.MaxBudgetInTeam,
+// createTeamMember creates a new team member using the typed request/response pattern
+func createTeamMember(ctx context.Context, c *litellm.Client, request *TeamMemberCreateRequest) (*TeamMemberResponse, error) {
+	maxRetries := 3
+	var lastErr error
+
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(attempt) * time.Second) // Progressive backoff: 1s, 2s
+		}
+
+		response, err := litellm.SendRequestTyped[TeamMemberCreateRequest, TeamMemberCreateResponse](
+			ctx, c, http.MethodPost, "/team/member_add", request,
+		)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		// Find the created user in the updated_users list
+		if len(request.Member) > 0 {
+			requestedUserID := request.Member[0].UserID
+			for _, updatedUser := range response.UpdatedUsers {
+				if updatedUser.UserID == requestedUserID {
+					return &TeamMemberResponse{
+						TeamID:          request.TeamID,
+						UserID:          updatedUser.UserID,
+						UserEmail:       updatedUser.UserEmail,
+						Role:            request.Member[0].Role,
+						MaxBudgetInTeam: updatedUser.MaxBudget,
+						Status:          "active",
+					}, nil
+				}
+			}
+		}
+
+		// If not found in response, verify by checking team info
+		teamInfo, err := team.GetTeam(ctx, c, request.TeamID)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		if teamInfo != nil && len(request.Member) > 0 {
+			requestedUserID := request.Member[0].UserID
+			for _, memberWithRole := range teamInfo.TeamInfo.MembersWithRoles {
+				if memberWithRole.UserID == requestedUserID {
+					var maxBudget float64 = request.MaxBudgetInTeam
+					for _, membership := range teamInfo.TeamMemberships {
+						if membership.UserID == memberWithRole.UserID && membership.LitellmBudgetTable.MaxBudget != nil {
+							maxBudget = *membership.LitellmBudgetTable.MaxBudget
+							break
+						}
+					}
+					return &TeamMemberResponse{
+						TeamID:          request.TeamID,
+						UserID:          memberWithRole.UserID,
+						UserEmail:       request.Member[0].UserEmail,
+						Role:            memberWithRole.Role,
+						MaxBudgetInTeam: maxBudget,
+						Status:          "active",
+					}, nil
+				}
+			}
+		}
 	}
 
-	_, err := c.SendRequest(ctx, http.MethodPost, "/team/member_add", memberData)
-	if err != nil {
-		return nil, err
+	if lastErr != nil {
+		return nil, fmt.Errorf("failed to create team member after %d attempts: %w", maxRetries, lastErr)
 	}
-
-	// For team member creation, we typically don't get detailed response data
-	// Return a response based on the input data
-	return &TeamMemberResponse{
-		TeamID:          member.TeamID,
-		UserID:          member.UserID,
-		UserEmail:       member.UserEmail,
-		Role:            member.Role,
-		MaxBudgetInTeam: member.MaxBudgetInTeam,
-		Status:          "active",
-	}, nil
+	return nil, fmt.Errorf("team member was not found after %d attempts", maxRetries)
 }
 
 // updateTeamMember updates an existing team member
-func updateTeamMember(ctx context.Context, c *litellm.Client, member *TeamMember) (*TeamMemberResponse, error) {
-	updateData := map[string]interface{}{
-		"user_id":            member.UserID,
-		"user_email":         member.UserEmail,
-		"team_id":            member.TeamID,
-		"max_budget_in_team": member.MaxBudgetInTeam,
+func updateTeamMember(ctx context.Context, c *litellm.Client, request *TeamMemberUpdateRequest) (*TeamMemberResponse, error) {
+	maxRetries := 3
+	var lastErr error
+
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(attempt) * time.Second) // Progressive backoff: 1s, 2s
+		}
+
+		_, err := litellm.SendRequestTyped[TeamMemberUpdateRequest, TeamMemberUpdateResponse](
+			ctx, c, http.MethodPost, "/team/member_update", request,
+		)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		// Verify the update by checking team info
+		teamInfo, err := team.GetTeam(ctx, c, request.TeamID)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		if teamInfo != nil {
+			for _, memberWithRole := range teamInfo.TeamInfo.MembersWithRoles {
+				if memberWithRole.UserID == request.UserID {
+					var maxBudget float64
+					if request.MaxBudgetInTeam != nil {
+						maxBudget = *request.MaxBudgetInTeam
+					}
+					for _, membership := range teamInfo.TeamMemberships {
+						if membership.UserID == memberWithRole.UserID && membership.LitellmBudgetTable.MaxBudget != nil {
+							maxBudget = *membership.LitellmBudgetTable.MaxBudget
+							break
+						}
+					}
+
+					var userEmail string
+					if request.UserEmail != nil {
+						userEmail = *request.UserEmail
+					}
+
+					return &TeamMemberResponse{
+						TeamID:          request.TeamID,
+						UserID:          memberWithRole.UserID,
+						UserEmail:       userEmail,
+						Role:            memberWithRole.Role,
+						MaxBudgetInTeam: maxBudget,
+						Status:          "active",
+					}, nil
+				}
+			}
+		}
 	}
 
-	_, err := c.SendRequest(ctx, http.MethodPost, "/team/member_update", updateData)
-	if err != nil {
-		return nil, err
+	if lastErr != nil {
+		return nil, fmt.Errorf("failed to update team member after %d attempts: %w", maxRetries, lastErr)
 	}
-
-	// Return updated member data
-	return &TeamMemberResponse{
-		TeamID:          member.TeamID,
-		UserID:          member.UserID,
-		UserEmail:       member.UserEmail,
-		Role:            member.Role,
-		MaxBudgetInTeam: member.MaxBudgetInTeam,
-		Status:          "active",
-	}, nil
+	return nil, fmt.Errorf("team member was not found after update after %d attempts", maxRetries)
 }
 
 // deleteTeamMember deletes a team member
@@ -131,12 +212,4 @@ func updateTeamMemberRole(ctx context.Context, c *litellm.Client, teamID, userID
 
 	_, err := c.SendRequest(ctx, http.MethodPost, "/team/member_update", updateData)
 	return err
-}
-
-// getTeamMember retrieves a team member (note: API doesn't provide direct endpoint)
-func getTeamMember(ctx context.Context, c *litellm.Client, teamID, userID string) (*TeamMemberResponse, error) {
-	// The LiteLLM API doesn't provide a direct endpoint to get a single team member
-	// This would typically require getting the entire team and filtering
-	// For now, we return nil to indicate the member should be read from state
-	return nil, fmt.Errorf("team member read not supported by API - maintaining state")
 }

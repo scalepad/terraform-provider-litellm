@@ -130,7 +130,7 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 
 	client := m.(*litellm.Client)
 
-	teamResp, err := getTeam(ctx, client, d.Id())
+	teamResp, err := GetTeam(ctx, client, d.Id())
 	if err != nil {
 		return diag.Errorf("error reading team: %v", err)
 	}
