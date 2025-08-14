@@ -65,12 +65,13 @@ func resourceTeamMemberCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	// Only set user_email if provided
 	if userEmail, ok := d.GetOk("user_email"); ok {
-		member.UserEmail = userEmail.(string)
+		email := userEmail.(string)
+		member.UserEmail = &email
 	}
 
 	request := &TeamMemberCreateRequest{
 		TeamID:          d.Get("team_id").(string),
-		Member:          []TeamMemberCreateMember{member},
+		Member:          member,
 		MaxBudgetInTeam: d.Get("max_budget_in_team").(float64),
 	}
 
