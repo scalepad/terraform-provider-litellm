@@ -23,7 +23,7 @@ type TeamMemberResponse struct {
 type TeamMemberAdd struct {
 	TeamID          string                `json:"team_id"`
 	Members         []TeamMemberAddMember `json:"member"`
-	MaxBudgetInTeam float64               `json:"max_budget_in_team"`
+	MaxBudgetInTeam float64               `json:"max_budget_in_team,omitempty"`
 }
 
 // TeamMemberAddMember represents a single member in bulk operations
@@ -35,16 +35,16 @@ type TeamMemberAddMember struct {
 
 // TeamMemberCreateRequest represents the request for creating a team member
 type TeamMemberCreateRequest struct {
-	TeamID          string                   `json:"team_id"`
-	Member          []TeamMemberCreateMember `json:"member"`
-	MaxBudgetInTeam float64                  `json:"max_budget_in_team"`
+	TeamID          string                 `json:"team_id"`
+	Member          TeamMemberCreateMember `json:"member"`
+	MaxBudgetInTeam float64                `json:"max_budget_in_team"`
 }
 
 // TeamMemberCreateMember represents a single member in the create request
 type TeamMemberCreateMember struct {
-	UserID    string `json:"user_id,omitempty"`
-	UserEmail string `json:"user_email,omitempty"`
-	Role      string `json:"role"`
+	UserID    string  `json:"user_id,omitempty"`
+	UserEmail *string `json:"user_email,omitempty"`
+	Role      string  `json:"role"`
 }
 
 // TeamMemberCreateResponse represents the response from creating a team member
