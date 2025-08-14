@@ -150,7 +150,7 @@ func resourceTeamMemberRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	// If member is not found in either list, remove from state
-	if foundMember == nil && memberRole == "" {
+	if foundMember == nil || memberRole == "" {
 		tflog.Warn(ctx, "Team member not found in team, removing from state", map[string]interface{}{
 			"user_id": userID,
 			"team_id": teamID,

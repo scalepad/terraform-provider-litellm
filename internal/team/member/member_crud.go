@@ -21,7 +21,7 @@ func createTeamMember(ctx context.Context, c *litellm.Client, request *TeamMembe
 			time.Sleep(time.Duration(attempt) * time.Second) // Progressive backoff: 1s, 2s
 		}
 
-		response, err := litellm.SendRequestTyped[TeamMemberCreateRequest, TeamMemberCreateResponse](
+		response, err := litellm.SendRequestTypedRateLimited[TeamMemberCreateRequest, TeamMemberCreateResponse](
 			ctx, c, http.MethodPost, "/team/member_add", request,
 		)
 		if err != nil {

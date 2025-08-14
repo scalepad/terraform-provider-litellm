@@ -8,14 +8,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type Client struct {
-	APIBase    string
-	APIKey     string
-	httpClient *http.Client
+	APIBase        string
+	APIKey         string
+	httpClient     *http.Client
+	rateLimitedMux sync.Mutex
 }
 
 // NewClient creates a new Client.
@@ -163,4 +165,21 @@ func SendRequestTyped[TRequest any, TResponse any](ctx context.Context, c *Clien
 	}
 
 	return &result, nil
+}
+
+// SendRequestTypedRateLimited sends an HTTP request to the LiteLLM API with typed request and response,
+// ensuring only one request is processed at a time using a mutex. This is useful for operations
+// that need to be serialized to prevent race conditions or API rate limiting issues.
+func SendRequestTypedRateLimited[TRequest any, TResponse any](ctx context.Context, c *Client, method, path string, body *TRequest) (*TResponse, error) {
+	// Acquire mutex to ensure only one request at a time
+	c.rateLimitedMux.Lock()
+	defer c.rateLimitedMux.Unlock()
+
+	tflog.Debug(ctx, "Acquired rate-limited mutex for request", map[string]interface{}{
+		"method": method,
+		"path":   path,
+	})
+
+	// Use the existing SendRequestTyped method for the actual request
+	return SendRequestTyped[TRequest, TResponse](ctx, c, method, path, body)
 }
