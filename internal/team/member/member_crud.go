@@ -29,9 +29,45 @@ func createTeamMember(ctx context.Context, c *litellm.Client, request *TeamMembe
 			continue
 		}
 
-		// Find the created user in the updated_users list
+		// First try to find the created user in the updated_team_memberships list for budget info
 		if len(request.Member) > 0 {
 			requestedUserID := request.Member[0].UserID
+
+			// Look for budget information in updated_team_memberships
+			for _, membership := range response.UpdatedTeamMemberships {
+				if membership.UserID == requestedUserID {
+					var maxBudget float64
+					if membership.LitellmBudgetTable.MaxBudget != nil {
+						maxBudget = *membership.LitellmBudgetTable.MaxBudget
+					}
+
+					// Get user email and role from updated_users or request
+					var userEmail string
+					var role string = request.Member[0].Role
+
+					for _, updatedUser := range response.UpdatedUsers {
+						if updatedUser.UserID == requestedUserID {
+							userEmail = updatedUser.UserEmail
+							break
+						}
+					}
+
+					if userEmail == "" {
+						userEmail = request.Member[0].UserEmail
+					}
+
+					return &TeamMemberResponse{
+						TeamID:          request.TeamID,
+						UserID:          membership.UserID,
+						UserEmail:       userEmail,
+						Role:            role,
+						MaxBudgetInTeam: maxBudget,
+						Status:          "active",
+					}, nil
+				}
+			}
+
+			// Fallback: Find the created user in the updated_users list
 			for _, updatedUser := range response.UpdatedUsers {
 				if updatedUser.UserID == requestedUserID {
 					return &TeamMemberResponse{
@@ -93,7 +129,7 @@ func updateTeamMember(ctx context.Context, c *litellm.Client, request *TeamMembe
 			time.Sleep(time.Duration(attempt) * time.Second) // Progressive backoff: 1s, 2s
 		}
 
-		_, err := litellm.SendRequestTyped[TeamMemberUpdateRequest, TeamMemberUpdateResponse](
+		response, err := litellm.SendRequestTyped[TeamMemberUpdateRequest, TeamMemberUpdateResponse](
 			ctx, c, http.MethodPost, "/team/member_update", request,
 		)
 		if err != nil {
@@ -101,7 +137,19 @@ func updateTeamMember(ctx context.Context, c *litellm.Client, request *TeamMembe
 			continue
 		}
 
-		// Verify the update by checking team info
+		// Use the update response data directly
+		var maxBudget float64
+		if response.MaxBudgetInTeam != nil {
+			maxBudget = *response.MaxBudgetInTeam
+		}
+
+		var userEmail string
+		if response.UserEmail != nil {
+			userEmail = *response.UserEmail
+		}
+
+		// For role, we need to get it from team info since it's not in the update response
+		var role string
 		teamInfo, err := team.GetTeam(ctx, c, request.TeamID)
 		if err != nil {
 			lastErr = err
@@ -111,33 +159,20 @@ func updateTeamMember(ctx context.Context, c *litellm.Client, request *TeamMembe
 		if teamInfo != nil {
 			for _, memberWithRole := range teamInfo.TeamInfo.MembersWithRoles {
 				if memberWithRole.UserID == request.UserID {
-					var maxBudget float64
-					if request.MaxBudgetInTeam != nil {
-						maxBudget = *request.MaxBudgetInTeam
-					}
-					for _, membership := range teamInfo.TeamMemberships {
-						if membership.UserID == memberWithRole.UserID && membership.LitellmBudgetTable.MaxBudget != nil {
-							maxBudget = *membership.LitellmBudgetTable.MaxBudget
-							break
-						}
-					}
-
-					var userEmail string
-					if request.UserEmail != nil {
-						userEmail = *request.UserEmail
-					}
-
-					return &TeamMemberResponse{
-						TeamID:          request.TeamID,
-						UserID:          memberWithRole.UserID,
-						UserEmail:       userEmail,
-						Role:            memberWithRole.Role,
-						MaxBudgetInTeam: maxBudget,
-						Status:          "active",
-					}, nil
+					role = memberWithRole.Role
+					break
 				}
 			}
 		}
+
+		return &TeamMemberResponse{
+			TeamID:          response.TeamID,
+			UserID:          response.UserID,
+			UserEmail:       userEmail,
+			Role:            role,
+			MaxBudgetInTeam: maxBudget,
+			Status:          "active",
+		}, nil
 	}
 
 	if lastErr != nil {
