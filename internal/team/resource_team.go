@@ -76,6 +76,11 @@ func ResourceTeam() *schema.Resource {
 				Optional:    true,
 				Description: "Budget automatically given to a new team member",
 			},
+			"team_member_budget_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the team member budget extracted from metadata",
+			},
 		},
 	}
 }

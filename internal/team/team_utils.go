@@ -140,7 +140,20 @@ func buildTeamUpdateRequest(d *schema.ResourceData, teamID string) *TeamUpdateRe
 	// Map fields - only set if changed
 	if d.HasChange("metadata") {
 		if v, ok := d.GetOk("metadata"); ok {
-			request.Metadata = v.(map[string]interface{})
+			metadata := v.(map[string]interface{})
+
+			// Clone the metadata map
+			metadataCopy := make(map[string]interface{}, len(metadata))
+			for k, v := range metadata {
+				metadataCopy[k] = v
+			}
+
+			// Re-add team_member_budget_id to metadata if it exists as a computed field
+			if budgetID, ok := d.GetOk("team_member_budget_id"); ok {
+				metadataCopy["team_member_budget_id"] = budgetID.(string)
+			}
+
+			request.Metadata = metadataCopy
 		}
 	}
 
@@ -192,7 +205,21 @@ func setTeamResourceData(d *schema.ResourceData, teamResp *TeamInfoResponse) err
 
 	// Handle metadata separately as it's a map
 	if teamInfo.Metadata != nil {
-		d.Set("metadata", teamInfo.Metadata)
+		// Create a copy of metadata, extracting team_member_budget_id during iteration
+		metadataCopy := make(map[string]interface{})
+		for k, v := range teamInfo.Metadata {
+			if k == "team_member_budget_id" {
+				// Extract team_member_budget_id and set it as a separate field
+				if budgetIDStr, ok := v.(string); ok {
+					d.Set("team_member_budget_id", budgetIDStr)
+				}
+				// Don't include it in the metadata copy
+			} else {
+				metadataCopy[k] = v
+			}
+		}
+
+		d.Set("metadata", metadataCopy)
 	}
 
 	// Handle models separately as it's a list
