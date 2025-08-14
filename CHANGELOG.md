@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.6.4] - 2025-08-14
+### :bug: Bug Fixes
+- [`6d39440`](https://github.com/scalepad/terraform-provider-litellm/commit/6d39440190e7faa67f80514b557ae5a9206aa86c) - **member**: fix issue with member data not updated properly in state *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`cbbb443`](https://github.com/scalepad/terraform-provider-litellm/commit/cbbb443e7402b3b970980b19e0d5971d1a03bb72) - **member_add**: be sure that member and member_add are sharing the same mutex to avoid concurrency issues *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+
 ## [v0.6.3] - 2025-08-14
 ### :sparkles: New Features
 - [`6c46482`](https://github.com/scalepad/terraform-provider-litellm/commit/6c46482ddc29464a4ad94ef451fd00a325adfa81) - check for the state of the team membership *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
@@ -260,3 +266,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.6.1]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.0...v0.6.1
 [v0.6.2]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.1...v0.6.2
 [v0.6.3]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.2...v0.6.3
+[v0.6.4]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.3...v0.6.4
