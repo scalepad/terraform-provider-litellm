@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.6.3] - 2025-08-14
+### :sparkles: New Features
+- [`6c46482`](https://github.com/scalepad/terraform-provider-litellm/commit/6c46482ddc29464a4ad94ef451fd00a325adfa81) - check for the state of the team membership *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+### :bug: Bug Fixes
+- [`05adcb6`](https://github.com/scalepad/terraform-provider-litellm/commit/05adcb698216053ba92ffa92bd11359b0eb14595) - key type can be changed later *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+- [`0951c15`](https://github.com/scalepad/terraform-provider-litellm/commit/0951c159d7048d077a6496dca5aff64a178b3d76) - **team_member**: implement rate limiting for team_member creation *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+
 ## [v0.6.2] - 2025-08-13
 ### :bug: Bug Fixes
 - [`fa57936`](https://github.com/scalepad/terraform-provider-litellm/commit/fa57936a58634711efc7413262ba1bf845ff7440) - add force new for key_type *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
@@ -250,3 +259,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.6.0]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.5.2...v0.6.0
 [v0.6.1]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.0...v0.6.1
 [v0.6.2]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.1...v0.6.2
+[v0.6.3]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.2...v0.6.3
