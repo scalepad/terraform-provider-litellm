@@ -32,6 +32,13 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
+
+      - name: Generate bot app token
+        id: generate_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASER_APP_ID }}
+          private-key: ${{ secrets.RELEASER_PRIVATE_KEY }}
       - name: Update CHANGELOG
         id: changelog
         uses: requarks/changelog-action@v1
@@ -48,9 +55,10 @@ jobs:
       - name: Commit updated changelog
         uses: IAreKyleW00t/verified-bot-commit@v1.5.1
         with:
-          message: "chore: update CHANGELOG.md for release ${{ github.ref_name }} [skip ci]"
+          message: "chore: update CHANGELOG.md for release ${{ github.ref_name }} [skip-ci]"
           files: CHANGELOG.md
           ref: refs/heads/main
+          token: ${{ steps.generate_token.outputs.token }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:

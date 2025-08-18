@@ -50,10 +50,11 @@ resource "litellm_team" "restricted_team" {
   blocked = false
 
   metadata = {
-    test_type   = "integration"
-    environment = "ci"
-    test_case   = "restricted_team"
-    tier        = "basic"
+    test_type     = "integration"
+    environment   = "ci"
+    test_case     = "restricted_team"
+    tier          = "basic"
+    test_scenario = "restricted_team_creation"
   }
 }
 
