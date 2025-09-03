@@ -44,6 +44,19 @@ func GetServiceAccount(ctx context.Context, c *litellm.Client, keyID string) (*S
 		return nil, fmt.Errorf("failed to get service account: %w", err)
 	}
 
+	// Remove service_account_id from metadata to avoid conflicts during updates
+	// The service_account_id should be managed separately from user-defined metadata
+	if response != nil && response.Info.Metadata != nil {
+		// Create a copy of metadata without service_account_id
+		cleanMetadata := make(map[string]interface{})
+		for key, value := range response.Info.Metadata {
+			if key != "service_account_id" {
+				cleanMetadata[key] = value
+			}
+		}
+		response.Info.Metadata = cleanMetadata
+	}
+
 	return response, nil
 }
 
@@ -51,6 +64,27 @@ func GetServiceAccount(ctx context.Context, c *litellm.Client, keyID string) (*S
 func UpdateServiceAccount(ctx context.Context, c *litellm.Client, keyID string, request *ServiceAccountUpdateRequest) (*ServiceAccountGenerateResponse, error) {
 	// Set the token for the update request
 	request.Token = keyID
+
+	// Before updating, get the current service account to preserve the service_account_id
+	// We need to call the API directly to get the full metadata including service_account_id
+	currentResponse, err := litellm.SendRequestTyped[interface{}, ServiceAccountInfoResponse](
+		ctx, c, http.MethodGet, fmt.Sprintf("/key/info?key=%s", keyID), nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get current service account before update: %w", err)
+	}
+
+	// Ensure metadata exists
+	if request.Metadata == nil {
+		request.Metadata = make(map[string]interface{})
+	}
+
+	// Preserve the service_account_id from the current service account
+	if currentResponse != nil && currentResponse.Info.Metadata != nil {
+		if serviceAccountID, exists := currentResponse.Info.Metadata["service_account_id"]; exists {
+			request.Metadata["service_account_id"] = serviceAccountID
+		}
+	}
 
 	response, err := litellm.SendRequestTyped[ServiceAccountUpdateRequest, ServiceAccountGenerateResponse](
 		ctx, c, http.MethodPost, "/key/update", request,
