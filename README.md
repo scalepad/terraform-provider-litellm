@@ -12,6 +12,7 @@ This Terraform provider allows you to manage LiteLLM resources through Infrastru
 - Control access to specific models
 - Specify model modes (e.g., completion, embedding, image generation)
 - Manage API keys with fine-grained controls
+- Create service account keys for production projects
 - Support for reasoning effort configuration in the model resource
 
 ## Requirements
@@ -125,12 +126,40 @@ The <code>litellm_key</code> resource supports the following options:
 
 For full details on the <code>litellm_key</code> resource, see the [key resource documentation](docs/resources/key.md).
 
+Here's an example of creating a service account key for production projects:
+
+```hcl
+resource "litellm_service_account" "prod_service" {
+  team_id          = "01991103-7931-701f-8a87-d56fb671593e"
+  key_alias        = "production-service-account"
+  models           = ["all-team-models"]
+  max_budget       = 500.0
+  tpm_limit        = 10000
+  rpm_limit        = 100
+  budget_duration  = "monthly"
+  metadata         = {
+    environment = "production"
+    project     = "api-gateway"
+  }
+  service_account_id = "prod-api-service"  # Optional - auto-generated if not provided
+}
+```
+
+Service account keys are ideal for production projects because:
+
+- They prevent keys from being deleted when users are removed
+- They apply team limits rather than individual user limits
+- They provide better separation between user keys and service keys
+
+For full details on the <code>litellm_service_account</code> resource, see the [service account resource documentation](docs/resources/service_account.md).
+
 ### Available Resources
 
 - <code>litellm_model</code>: Manage model configurations. [Documentation](docs/resources/model.md)
 - <code>litellm_team</code>: Manage teams. [Documentation](docs/resources/team.md)
 - <code>litellm_team_member</code>: Manage team members. [Documentation](docs/resources/team_member.md)
 - <code>litellm_key</code>: Manage API keys. [Documentation](docs/resources/key.md)
+- <code>litellm_service_account</code>: Manage service account keys for production projects. [Documentation](docs/resources/service_account.md)
 - <code>litellm_mcp_server</code>: Manage MCP (Model Context Protocol) servers. [Documentation](docs/resources/mcp_server.md)
 - <code>litellm_credential</code>: Manage credentials for secure authentication. [Documentation](docs/resources/credential.md)
 - <code>litellm_vector_store</code>: Manage vector stores for embeddings and RAG. [Documentation](docs/resources/vector_store.md)
