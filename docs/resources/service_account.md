@@ -23,7 +23,7 @@ resource "litellm_service_account" "production_api" {
   max_budget       = 1000.0
   tpm_limit        = 50000
   rpm_limit        = 500
-  budget_duration  = "monthly"
+  budget_duration  = "30d"
   metadata         = {
     environment = "production"
     service     = "api-gateway"
@@ -66,7 +66,7 @@ The following arguments are supported:
 
 - `soft_budget` - (Optional) Soft budget limit that triggers warnings before reaching the hard limit.
 
-- `budget_duration` - (Optional) Budget reset duration. Examples: `"30s"`, `"30m"`, `"30h"`, `"30d"`, `"monthly"`.
+- `budget_duration` - (Optional) Budget is reset at the end of specified duration. If not set, budget is never reset. You can set duration as seconds ("30s"), minutes ("30m"), hours ("30h"), days ("30d").
 
 - `tpm_limit` - (Optional) Tokens per minute limit for rate limiting.
 
