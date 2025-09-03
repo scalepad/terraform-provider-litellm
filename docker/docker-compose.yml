@@ -1,6 +1,6 @@
 services:
   litellm:
-    image: ghcr.io/berriai/litellm:main-dev
+    image: ghcr.io/berriai/litellm:main-latest
     container_name: litellm
     ports:
       - "4000:4000"

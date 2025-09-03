@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/scalepad/terraform-provider-litellm/internal/key"
+	"github.com/scalepad/terraform-provider-litellm/internal/key/service-account"
 	"github.com/scalepad/terraform-provider-litellm/internal/litellm"
 	"github.com/scalepad/terraform-provider-litellm/internal/models"
 	"github.com/scalepad/terraform-provider-litellm/internal/models/creds"
@@ -27,6 +28,7 @@ func Provider() *schema.Provider {
 			"litellm_team_member":     member.ResourceTeamMember(),
 			"litellm_team_member_add": member.ResourceTeamMemberAdd(),
 			"litellm_key":             key.ResourceKey(),
+			"litellm_service_account": serviceaccount.ResourceServiceAccount(),
 			"litellm_mcp_server":      mcp.ResourceLiteLLMMCPServer(),
 			"litellm_credential":      creds.ResourceCredential(),
 			"litellm_vector_store":    vector.ResourceLiteLLMVectorStore(),
