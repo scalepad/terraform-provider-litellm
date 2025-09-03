@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.7.0] - 2025-09-03
+### :sparkles: New Features
+- [`e7c4d6c`](https://github.com/scalepad/terraform-provider-litellm/commit/e7c4d6ca6adc70b97588daad513ff9a206dca979) - **service-account**: add service account keys *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+### :bug: Bug Fixes
+- [`b9f2953`](https://github.com/scalepad/terraform-provider-litellm/commit/b9f29539611aedde040b9849371e50ef161ef889) - **service-account**: don't override the service_account_id *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
+
+
 ## [v0.6.5] - 2025-08-14
 ### :bug: Bug Fixes
 - [`bc37c0c`](https://github.com/scalepad/terraform-provider-litellm/commit/bc37c0c431b2d2d61ca352470e2a38e2e709872a) - **team**: fix issue when setting metadata where we override the team_member_budget_id *(commit by [@sp-aaflalo](https://github.com/sp-aaflalo))*
@@ -273,3 +281,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v0.6.3]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.2...v0.6.3
 [v0.6.4]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.3...v0.6.4
 [v0.6.5]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.4...v0.6.5
+[v0.7.0]: https://github.com/scalepad/terraform-provider-litellm/compare/v0.6.5...v0.7.0
