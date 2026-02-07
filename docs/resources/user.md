@@ -57,7 +57,6 @@ resource "litellm_user" "advanced" {
   auto_create_key   = true
   key_alias         = "admin-key"
   duration          = "30d"
-  blocked           = false
 
   # Advanced features
   allowed_cache_controls = ["no-cache", "no-store"]
@@ -123,10 +122,6 @@ The following arguments are supported:
 - `model_tpm_limit` - (Optional) Model-specific TPM limits. Map of model names to limit strings.
 
 - `model_rpm_limit` - (Optional) Model-specific RPM limits. Map of model names to limit strings.
-
-### Security and Permissions
-
-- `blocked` - (Optional) Whether the user is blocked. Defaults to `false`.
 
 ### User Management
 

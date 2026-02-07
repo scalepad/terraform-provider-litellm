@@ -45,7 +45,6 @@ type User struct {
 	Aliases              map[string]interface{} `json:"aliases,omitempty"`
 	Config               map[string]interface{} `json:"config,omitempty"`
 	AllowedCacheControls []string               `json:"allowed_cache_controls,omitempty"`
-	Blocked              bool                   `json:"blocked"`
 	MaxParallelRequests  int                    `json:"max_parallel_requests,omitempty"`
 	SoftBudget           float64                `json:"soft_budget,omitempty"`
 	ModelMaxBudget       map[string]interface{} `json:"model_max_budget,omitempty"`
@@ -78,7 +77,6 @@ type UserCreateRequest struct {
 	Aliases              map[string]interface{} `json:"aliases,omitempty"`
 	Config               map[string]interface{} `json:"config,omitempty"`
 	AllowedCacheControls []string               `json:"allowed_cache_controls,omitempty"`
-	Blocked              bool                   `json:"blocked"`
 	MaxParallelRequests  int                    `json:"max_parallel_requests,omitempty"`
 	SoftBudget           float64                `json:"soft_budget,omitempty"`
 	ModelMaxBudget       map[string]interface{} `json:"model_max_budget,omitempty"`
@@ -106,7 +104,6 @@ type UserUpdateRequest struct {
 	Aliases              map[string]interface{} `json:"aliases,omitempty"`
 	Config               map[string]interface{} `json:"config,omitempty"`
 	AllowedCacheControls []string               `json:"allowed_cache_controls,omitempty"`
-	Blocked              bool                   `json:"blocked"`
 	MaxParallelRequests  int                    `json:"max_parallel_requests,omitempty"`
 	SoftBudget           float64                `json:"soft_budget,omitempty"`
 	ModelMaxBudget       map[string]interface{} `json:"model_max_budget,omitempty"`

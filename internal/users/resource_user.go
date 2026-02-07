@@ -163,7 +163,6 @@ func buildUserCreateRequest(d *schema.ResourceData) *UserCreateRequest {
 	// Boolean fields - use d.Get() to include false values
 	req.SendInviteEmail = d.Get("send_invite_email").(bool)
 	req.AutoCreateKey = d.Get("auto_create_key").(bool)
-	req.Blocked = d.Get("blocked").(bool)
 
 	// Handle string slices
 	if v, ok := d.GetOk("models"); ok {
@@ -267,9 +266,6 @@ func buildUserUpdateRequest(d *schema.ResourceData, userID string) *UserUpdateRe
 		req.MaxParallelRequests = v.(int)
 	}
 
-	// Boolean fields - use d.Get() to include false values
-	req.Blocked = d.Get("blocked").(bool)
-
 	// Handle string slices
 	if v, ok := d.GetOk("models"); ok {
 		modelsList := v.([]interface{})
@@ -352,9 +348,6 @@ func setUserResourceData(d *schema.ResourceData, user *User) error {
 	utils.SetIfNotZero(d, "tpm_limit", user.TPMLimit)
 	utils.SetIfNotZero(d, "rpm_limit", user.RPMLimit)
 	utils.SetIfNotZero(d, "max_parallel_requests", user.MaxParallelRequests)
-
-	// Handle boolean fields - always set them (including false values)
-	utils.SetIfNotZero(d, "blocked", user.Blocked)
 
 	// Handle string slices - only set if not empty
 	if len(user.Models) > 0 {
